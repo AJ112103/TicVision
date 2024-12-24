@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Activity, Brain, Heart } from "lucide-react";
+import { getAuth } from "firebase/auth";
 
 const features = [
   {
@@ -21,6 +22,17 @@ const features = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  const handleStartJourney = () => {
+    const auth = getAuth();
+    if (auth.currentUser) {
+      navigate("/dashboard")
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md">
@@ -59,13 +71,13 @@ const Index = () => {
               powerful visualization tools and personalized insights.
             </p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                to="/register"
+              <button
+                onClick={handleStartJourney}
                 className="btn-primary group w-full sm:w-auto"
               >
                 Start Your Journey
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
+              </button>
               <Link
                 to="/learn-more"
                 className="btn-secondary w-full sm:w-auto"
