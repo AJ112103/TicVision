@@ -1,55 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #61dafb 0%, #646cff 100%);
-  color: #ffffff;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  padding: 2rem;
-  box-sizing: border-box;
+  @apply flex h-screen;
+}
+
+.login-info {
+  @apply flex-[0.6] bg-primary text-white flex flex-col justify-center items-center text-center p-8;
+  animation: fadeInLeft 1s ease-in-out;
+}
+
+.login-info-title {
+  @apply text-4xl font-bold mb-4 font-display;
+  animation: fadeInUp 1s ease-in-out;
+}
+
+.login-info-description {
+  @apply text-lg max-w-lg leading-relaxed text-white/90;
+  animation: fadeInUp 1.2s ease-in-out;
+}
+
+.login-auth {
+  @apply flex-[0.4] flex flex-col justify-center items-center bg-background p-8;
+  animation: fadeInRight 1s ease-in-out;
 }
 
 .login-title {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s;
-}
-
-.login-title:hover {
-  transform: scale(1.05);
-}
-
-.login-description {
-  font-size: 1.25rem;
-  margin-bottom: 2rem;
-  color: rgba(255, 255, 255, 0.9);
-  max-width: 600px;
-  line-height: 1.6;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  @apply text-3xl font-bold mb-6 font-display text-text-primary;
+  animation: fadeInUp 1s ease-in-out;
 }
 
 .login-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #c4d2e7;
-  color: black;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 25px;
-  font-size: 1.25rem;
-  cursor: pointer;
-  transition: background-color 0.3s, box-shadow 0.3s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  @apply flex items-center justify-center bg-primary text-white px-8 py-3 rounded-lg font-medium shadow-lg transition-all;
+  animation: fadeInUp 1.2s ease-in-out;
 }
 
 .login-button:hover {
-  background-color: #fff;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+  @apply bg-primary-dark shadow-xl;
 }
 
 .google-logo {
@@ -58,15 +47,35 @@
   margin-right: 0.75rem;
 }
 
-@media (max-width: 768px) {
-  .login-title {
-      font-size: 2.5rem;
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
   }
-  .login-description {
-      font-size: 1rem;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
-  .login-button {
-      font-size: 1rem;
-      padding: 0.75rem 1.5rem;
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
