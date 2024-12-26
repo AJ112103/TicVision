@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Activity, 
   Calendar, 
-  Clock, 
-  LineChart, 
+  Clock,  
   Plus,
   Sliders,
-  User
 } from 'lucide-react';
 import {
   LineChart as RechartsLineChart,
