@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Calendar, Clock, Plus, Sliders } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import LogTicModal from "./logticmodal"
 
 interface TicEntry {
   id: string;
@@ -92,42 +93,7 @@ const Dashboard = () => {
 
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
             <div className="card lg:col-span-1">
-              <h2 className="mb-4 text-lg font-bold sm:text-xl">Log New Tic</h2>
-              <div className="relative aspect-[2/3] w-full">
-                <div className="human-silhouette">
-                  <button
-                    onClick={() => handleLocationSelect('head')}
-                    className={`silhouette-region head ${selectedLocation === 'head' ? 'active' : ''}`}
-                  />
-                  <button
-                    onClick={() => handleLocationSelect('neck')}
-                    className={`silhouette-region neck ${selectedLocation === 'neck' ? 'active' : ''}`}
-                  />
-                </div>
-              </div>
-              <div className="mt-4">
-                <label className="label">Intensity</label>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={intensity}
-                  onChange={(e) => handleIntensityChange(Number(e.target.value))}
-                  className="intensity-slider"
-                />
-                <div className="mt-2 flex justify-between text-xs sm:text-sm text-text-secondary">
-                  <span>Mild (1)</span>
-                  <span>Severe (10)</span>
-                </div>
-              </div>
-              <button
-                onClick={handleSubmit}
-                className="btn-primary mt-4 w-full text-sm sm:text-base"
-                disabled={!selectedLocation}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Log Tic
-              </button>
+              <LogTicModal />
             </div>
 
             <div className="card lg:col-span-2">
