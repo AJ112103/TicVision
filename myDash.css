@@ -1,0 +1,94 @@
+@layer components {
+    .intensity-slider {
+        @apply w-full appearance-none rounded-lg bg-secondary;
+        height: 6px;
+    }
+  
+    .intensity-slider::-webkit-slider-thumb {
+        @apply h-4 w-4 appearance-none rounded-full bg-primary transition-all hover:h-5 hover:w-5;
+        cursor: pointer;
+    }
+  
+    .intensity-slider::-moz-range-thumb {
+        @apply h-4 w-4 appearance-none rounded-full bg-primary border-none transition-all hover:h-5 hover:w-5;
+        cursor: pointer;
+    }
+  
+    .popup-overlay {
+        @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] grid place-items-center p-4;
+    }
+  
+    .popup-content {
+        @apply bg-white rounded-xl shadow-2xl min-w-[320px] max-w-[400px] w-full mx-auto p-6;
+    }
+  
+    .popup-input {
+        @apply w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none;
+    }
+  
+    .popup-title {
+        @apply text-2xl font-bold mb-4;
+    }
+  
+    .popup-description {
+        @apply text-gray-600 mb-6;
+    }
+  
+    .human-silhouette {
+        @apply absolute inset-0 bg-secondary/10 rounded-lg;
+    }
+  
+    .silhouette-region {
+        @apply absolute rounded-full bg-transparent transition-all hover:bg-primary/20;
+    }
+  
+    .silhouette-region.active {
+        @apply bg-primary/40;
+    }
+  
+    .silhouette-region.head {
+        @apply w-16 h-16;
+        top: 5%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+  
+    .silhouette-region.neck {
+        @apply w-12 h-8;
+        top: 18%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+  
+    .btn-primary {
+        @apply bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/80 transition-all flex items-center justify-center gap-2 font-medium disabled:opacity-50;
+    }
+  
+    .card {
+        @apply bg-white rounded-xl shadow-sm p-6;
+    }
+  
+    .chart-container {
+        @apply bg-white rounded-xl p-6;
+    }
+  
+    .bg-background {
+        @apply bg-gray-50;
+    }
+  
+    .text-primary {
+        @apply text-indigo-500;
+    }
+  
+    .text-text-secondary {
+        @apply text-gray-600;
+    }
+  
+    .bg-primary {
+        @apply bg-indigo-500;
+    }
+  
+    .bg-secondary {
+        @apply bg-gray-200;
+    }
+  }

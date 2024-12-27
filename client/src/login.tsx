@@ -1,21 +1,43 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from './firebase';
 import { motion } from 'framer-motion';
 import './login.css';
+import { db } from './firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 const provider = new GoogleAuthProvider();
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigate('/dashboard');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
   const handleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      const userRef = doc(db, 'users', user.uid);
+  
+      await setDoc(
+        userRef,
+        {
+          email: user.email,
+          createdAt: user.metadata.creationTime,
+        },
+        { merge: true }
+      );
+
       console.log('User Info:', user);
-      navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
       alert('Login failed. Please try again.');

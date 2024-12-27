@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Activity, Brain, Heart } from "lucide-react";
-import { getAuth } from "firebase/auth";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { getAuth } from 'firebase/auth';
+import { ArrowRight, Activity, Brain, Heart } from 'lucide-react';
 
 const features = [
   {
@@ -21,12 +22,13 @@ const features = [
   },
 ];
 
-const Index = () => {
+const Index: React.FC = () => {
   const navigate = useNavigate();
+  const auth = getAuth();
+  const isAuthenticated = auth.currentUser != null;
 
   const handleStartJourney = () => {
-    const auth = getAuth();
-    if (auth.currentUser) {
+    if (isAuthenticated) {
       navigate("/dashboard");
     } else {
       navigate("/login");
@@ -41,12 +43,16 @@ const Index = () => {
             TicVision
           </Link>
           <div className="flex items-center gap-3 sm:gap-6">
-            <Link to="/login" className="btn-secondary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
-              Sign In
-            </Link>
-            <Link to="/register" className="btn-primary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
-              Get Started
-            </Link>
+            {!isAuthenticated && (
+              <>
+                <Link to="/login" className="btn-secondary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
+                  Sign In
+                </Link>
+                <Link to="/register" className="btn-primary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       </header>
@@ -67,8 +73,7 @@ const Index = () => {
               <span className="text-primary"> Journey</span>
             </h1>
             <p className="mb-6 sm:mb-8 text-base sm:text-lg text-text-secondary lg:text-xl">
-              TicVision helps you track, understand, and manage your tics with
-              powerful visualization tools and personalized insights.
+              TicVision helps you track, understand, and manage your tics with powerful visualization tools and personalized insights.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 sm:justify-center">
               <button

@@ -4,7 +4,6 @@ import { Activity, Calendar, Clock, Plus, Sliders } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { db } from './firebase';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import LogTicModal from "./logticmodal";
 
 interface TicEntry {
   id: string;
@@ -22,10 +21,13 @@ const Dashboard = () => {
   const [name, setName] = useState("");
   const userId = localStorage.getItem("userId");
 
-  const chartData = ticHistory.map((entry) => ({
-    date: entry.timestamp.toISOString().split('T')[0],
-    intensity: entry.intensity,
-  }));
+  const chartData = [
+    { date: '2024-01', intensity: 4 },
+    { date: '2024-02', intensity: 6 },
+    { date: '2024-03', intensity: 3 },
+    { date: '2024-04', intensity: 7 },
+    { date: '2024-05', intensity: 5 }
+  ];
 
   const checkUserName = async () => {
     if (userId) {
@@ -63,7 +65,7 @@ const Dashboard = () => {
     const newEntry: TicEntry = {
       id: Date.now().toString(),
       location: selectedLocation,
-      intensity,
+      intensity: intensity,
       timestamp: new Date(),
     };
 
@@ -151,8 +153,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="card lg:col-span-1">
-              <LogTicModal />
+            <div className="card">
               <h2 className="text-xl font-bold mb-6">Log New Tic</h2>
               <div className="relative aspect-[2/3] w-full">
                 <div className="human-silhouette">
@@ -190,22 +191,22 @@ const Dashboard = () => {
                 Log Tic
               </button>
             </div>
-            <div className="card lg:col-span-2">
+            <div className="chart-container lg:col-span-2">
               <h2 className="text-xl font-bold mb-6">Tic History</h2>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <RechartsLineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis
-                      dataKey="date"
+                    <XAxis 
+                      dataKey="date" 
                       tick={{ fontSize: 12, fill: '#6B7280' }}
                       stroke="#E5E7EB"
                     />
-                    <YAxis
+                    <YAxis 
                       tick={{ fontSize: 12, fill: '#6B7280' }}
                       stroke="#E5E7EB"
                     />
-                    <Tooltip
+                    <Tooltip 
                       contentStyle={{
                         backgroundColor: 'white',
                         border: 'none',
@@ -213,9 +214,9 @@ const Dashboard = () => {
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                       }}
                     />
-                    <Line
-                      type="monotone"
-                      dataKey="intensity"
+                    <Line 
+                      type="monotone" 
+                      dataKey="intensity" 
                       stroke="#6366F1"
                       strokeWidth={2}
                       dot={{ stroke: '#6366F1', strokeWidth: 2, r: 4, fill: 'white' }}

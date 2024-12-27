@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFunctions } from "firebase/functions";
 import { getFirestore } from "firebase/firestore";
 
@@ -17,6 +17,18 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 const functions = getFunctions(app);
 const db = getFirestore(app);
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    user.getIdToken().then(token => {
+      localStorage.setItem('userToken', token);
+      localStorage.setItem('userId', user.uid);
+    });
+  } else {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('userId');
+  }
+});
 
 export { functions };
 export { db };
