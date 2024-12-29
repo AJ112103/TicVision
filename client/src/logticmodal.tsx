@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import armIcon from "./assets/arm.svg"; 
 import eyeIcon from "./assets/eye.svg"; 
@@ -81,9 +81,9 @@ const LogTicModal = () => {
 
   return (
     <div className="card lg:col-span-1" {...swipeHandlers}>
-      <h2 className="mb-4 text-lg font-bold sm:text-xl text-center">
+      <h4 className="mb-2 text-lg sm:text-m text-center">
         {filterSections[currentSection]}
-      </h2>
+      </h4>
       {/* Indicator Dots */}
       <div className="flex justify-center gap-2 mb-4">
         {filterSections.map((_, index) => (

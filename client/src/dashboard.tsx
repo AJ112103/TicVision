@@ -153,42 +153,6 @@ const Dashboard = () => {
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="card lg:col-span-1">
               <LogTicModal />
-              <h2 className="text-xl font-bold mb-6">Log New Tic</h2>
-              <div className="relative aspect-[2/3] w-full">
-                <div className="human-silhouette">
-                  <button
-                    onClick={() => handleLocationSelect('head')}
-                    className={`silhouette-region head ${selectedLocation === 'head' ? 'active' : ''}`}
-                  />
-                  <button
-                    onClick={() => handleLocationSelect('neck')}
-                    className={`silhouette-region neck ${selectedLocation === 'neck' ? 'active' : ''}`}
-                  />
-                </div>
-              </div>
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Intensity</label>
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={intensity}
-                  onChange={(e) => handleIntensityChange(Number(e.target.value))}
-                  className="intensity-slider"
-                />
-                <div className="mt-2 flex justify-between text-sm text-gray-600">
-                  <span>Mild (1)</span>
-                  <span>Severe (10)</span>
-                </div>
-              </div>
-              <button
-                onClick={handleSubmit}
-                className="btn-primary mt-6 w-full"
-                disabled={!selectedLocation}
-              >
-                <Plus className="h-5 w-5" />
-                Log Tic
-              </button>
             </div>
             <div className="card lg:col-span-2">
               <h2 className="text-xl font-bold mb-6">Tic History</h2>
