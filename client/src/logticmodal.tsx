@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import armIcon from "./assets/arm.svg"; 
 import eyeIcon from "./assets/eye.svg"; 
