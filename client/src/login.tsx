@@ -32,7 +32,7 @@ const Login: React.FC = () => {
         userRef,
         {
           email: user.email,
-          diplsayName: user.displayName,
+          displayName: user.displayName,
           createdAt: user.metadata.creationTime,
         },
         { merge: true }
