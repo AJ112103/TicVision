@@ -170,11 +170,11 @@ const LogNewTic = () => {
               Date
             </label>
             <input
-              id="date"
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full mt-2 p-2 border rounded"
+            id="date"
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="w-full mt-2 p-2 border rounded box-border"
             />
           </div>
 
