@@ -11,6 +11,7 @@ import stomachIcon from "./assets/stomach.svg";
 import wordIcon from "./assets/word.svg"; 
 import simpleIcon from "./assets/simple.svg"; 
 import complexIcon from "./assets/complex.svg"; 
+import { useNavigate } from "react-router-dom";
 
 interface TicType {
   id: string;
@@ -30,7 +31,7 @@ const ticTypes: TicType[] = [
   { id: "8", name: "Shoulder", tag: "motor", icon: shoulderIcon },
   { id: "9", name: "Simple Vocal", tag: "vocal", icon: simpleIcon },
   { id: "10", name: "Stomach", tag: "motor", icon: stomachIcon },
-  { id: "11", name: "Word/Phrase", tag: "vocal", icon: wordIcon },
+  { id: "11", name: "Word Phrase", tag: "vocal", icon: wordIcon },
 ];
 
 const myTics: TicType[] = [
@@ -39,9 +40,15 @@ const myTics: TicType[] = [
 
 const filterSections = ["My Tics", "Vocal", "Motor", "All"];
 
+
 const LogTicModal = () => {
   const [currentSection, setCurrentSection] = useState(0);
   const [filteredTics, setFilteredTics] = useState<TicType[]>([]);
+  const navigate = useNavigate();
+
+    const handleTileClick = (ticName: string) => {
+        navigate(`/logtic/${ticName.replace(/\s+/g, "-").toLowerCase()}`);
+    };
 
   const updateFilteredTics = (sectionIndex: number) => {
     switch (filterSections[sectionIndex]) {
@@ -102,6 +109,7 @@ const LogTicModal = () => {
             filteredTics.map((tic) => (
               <button
                 key={tic.id}
+                onClick={() => handleTileClick(tic.name)}
                 className="flex flex-col items-center justify-center p-4 bg-[#4a90a1] text-white rounded-lg hover:bg-[#3c7a8b]"
               >
                 {/* Icon */}
