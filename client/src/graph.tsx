@@ -1,163 +1,315 @@
 import { useEffect, useState } from "react";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-  TooltipProps
+  ResponsiveContainer
 } from "recharts";
-import { getFirestore, collection, query, getDocs, where } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { auth } from "./firebase";
 
 interface TicData {
   timeOfDay: string;
-  date?: string;
+  date: string;
   intensity: number;
-  location: string;
+  location: string; // the tic “type”
 }
 
-interface ChartDataPoint {
-  timeOfDay?: string;
-  date?: string;
-  [key: string]: number | string | undefined;
+interface MyTic {
+  name: string;  
+  count: number;
+  color: string;
 }
 
-const ticTypes = [
-  { id: "1", name: "Arm", color: "#4a90a1" },
-  { id: "2", name: "Complex Vocal", color: "#407f8f" },
-  { id: "3", name: "Eye", color: "#366e7d" },
-  { id: "4", name: "Jaw", color: "#2c5d6b" },
-  { id: "5", name: "Leg", color: "#224c59" },
-  { id: "6", name: "Mouth", color: "#183b47" },
-  { id: "7", name: "Neck", color: "#0e2a35" },
-  { id: "8", name: "Shoulder", color: "#559bad" },
-  { id: "9", name: "Simple Vocal", color: "#60a6bb" },
-  { id: "10", name: "Stomach", color: "#6bb1c9" },
-  { id: "11", name: "Word Phrase", color: "#76bcd7" }
-];
+// 1. Add "all" to your time range options
+const timeRanges = {
+  all: "All Time",
+  day: "Today",
+  week: "Last Week",
+  month: "Last Month",
+  threeMonths: "Last 3 Months",
+  sixMonths: "Last 6 Months",
+  year: "Last Year"
+};
 
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
-  if (active && payload && payload.length) {
-    const timeLabel = payload[0]?.payload?.timeOfDay || payload[0]?.payload?.date;
-    const activeEntries = payload.filter(entry => entry.value !== undefined && entry.value > 0);
+const TicLineChart = () => {
+  // 2. Default the timeRange to "all"
+  const [timeRange, setTimeRange] = useState("all");
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [myTics, setMyTics] = useState<MyTic[]>([]);
+  const [selectedTics, setSelectedTics] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const db = getFirestore();
 
-    if (activeEntries.length === 0) return null;
+  // Fetch "mytics" from Firestore
+  const fetchMyTics = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
+    try {
+      const myTicsCollection = collection(db, "users", user.uid, "mytics");
+      const snapshot = await getDocs(myTicsCollection);
+
+      const tics = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          name: data.name, 
+          count: data.count,
+          // Random color
+          color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+        };
+      });
+
+      console.log("Fetched MyTics from Firestore:", tics);
+
+      setMyTics(tics);
+      // By default, select all tics
+      setSelectedTics(tics.map(tic => tic.name));
+    } catch (error) {
+      console.error("Error fetching my tics:", error);
+    }
+  };
+
+  // Fetch the ticHistory records
+  const fetchTicHistory = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const historyCollection = collection(db, "users", user.uid, "ticHistory");
+      const snapshot = await getDocs(historyCollection);
+      const ticData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          timeOfDay: data.timeOfDay,
+          date: data.date,
+          intensity: data.intensity,
+          location: data.location,
+          id: doc.id
+        } as TicData;
+      });
+
+      console.log("Raw tic history from Firestore:", ticData);
+
+      const processedData = processTicData(ticData);
+
+      console.log("Processed data for chart:", processedData);
+
+      setChartData(processedData);
+    } catch (error) {
+      console.error("Error fetching tic history:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Process tic data so that entries with the same location on the same date/time are averaged
+  const processTicData = (data: TicData[]) => {
+    const now = new Date();
+
+    // Filter data based on selected timeRange
+    const filteredData = data.filter(tic => {
+      const ticDate = new Date(tic.date);
+      switch (timeRange) {
+        case "all":
+          // Show everything
+          return true;
+        case "day":
+          return ticDate.toDateString() === now.toDateString();
+        case "week":
+          return now.getTime() - ticDate.getTime() <= 7 * 24 * 60 * 60 * 1000;
+        case "month":
+          return (
+            now.getMonth() === ticDate.getMonth() &&
+            now.getFullYear() === ticDate.getFullYear()
+          );
+        case "threeMonths":
+          return now.getTime() - ticDate.getTime() <= 90 * 24 * 60 * 60 * 1000;
+        case "sixMonths":
+          return now.getTime() - ticDate.getTime() <= 180 * 24 * 60 * 60 * 1000;
+        case "year":
+          return now.getFullYear() === ticDate.getFullYear();
+        default:
+          return true;
+      }
+    });
+
+    // Group data by date/timeKey, then by location
+    const groupedData = filteredData.reduce((acc: any, tic) => {
+      // For day view, group by timeOfDay, else group by full date
+      const key = timeRange === "day" ? tic.timeOfDay : tic.date;
+
+      if (!acc[key]) {
+        acc[key] = { timeKey: key };
+      }
+      if (!acc[key][tic.location]) {
+        acc[key][tic.location] = { sum: 0, count: 0 };
+      }
+
+      acc[key][tic.location].sum += tic.intensity;
+      acc[key][tic.location].count += 1;
+
+      return acc;
+    }, {});
+
+    // Convert the grouped object to an array
+    const result = Object.values(groupedData).map((entry: any) => {
+      const item: Record<string, number | string> = {
+        timeKey: entry.timeKey
+      };
+      // For each location, compute average intensity
+      Object.keys(entry).forEach(k => {
+        if (k !== "timeKey") {
+          const { sum, count } = entry[k];
+          item[k] = sum / count;
+        }
+      });
+      return item;
+    });
+
+    // Sort by timeKey
+    return result.sort((a: any, b: any) => {
+      if (timeRange === "day") {
+        // Sort by time of day if day view
+        const timeA = new Date(`2000/01/01 ${a.timeKey}`).getTime();
+        const timeB = new Date(`2000/01/01 ${b.timeKey}`).getTime();
+        return timeA - timeB;
+      } else {
+        // Otherwise, sort by actual date
+        return new Date(a.timeKey).getTime() - new Date(b.timeKey).getTime();
+      }
+    });
+  };
+
+  // Fetch myTics on mount
+  useEffect(() => {
+    fetchMyTics();
+  }, []);
+
+  // Fetch ticHistory whenever timeRange changes
+  useEffect(() => {
+    fetchTicHistory();
+  }, [timeRange]);
+
+  // Toggle lines by location
+  const toggleTic = (ticName: string) => {
+    setSelectedTics(prev =>
+      prev.includes(ticName)
+        ? prev.filter(name => name !== ticName)
+        : [...prev, ticName]
+    );
+  };
+
+  if (loading) {
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-        <p className="text-sm font-semibold mb-2">{timeLabel}</p>
-        <div className="space-y-1">
-          {activeEntries.map((entry, index) => {
-            const ticType = ticTypes.find(t => t.name === entry.name);
-            return (
-              <div key={index} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: ticType?.color }}
-                />
-                <span className="text-sm text-gray-700">
-                  {entry.name}: {entry.value} intensity
-                </span>
-              </div>
-            );
-          })}
-        </div>
+      <div className="flex justify-center items-center h-48">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
       </div>
     );
   }
-  return null;
-};
-
-const TicBarChart = () => {
-  const [timeRange, setTimeRange] = useState("day");
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const db = getFirestore();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const q = query(collection(db, "ticData"), where("userId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-      const rawData = querySnapshot.docs.map(doc => doc.data() as TicData);
-
-      const processedData = rawData.reduce((acc: ChartDataPoint[], item) => {
-        const timeKey = timeRange === "day" ? item.timeOfDay : item.date;
-        const existingEntry = acc.find(entry => 
-          timeRange === "day" ? entry.timeOfDay === timeKey : entry.date === timeKey
-        );
-
-        if (existingEntry) {
-          existingEntry[item.location] = (existingEntry[item.location] as number || 0) + item.intensity;
-        } else {
-          const newEntry: ChartDataPoint = timeRange === "day" 
-            ? { timeOfDay: timeKey } 
-            : { date: timeKey };
-          newEntry[item.location] = item.intensity;
-          acc.push(newEntry);
-        }
-        return acc;
-      }, []);
-
-      setChartData(processedData);
-    };
-
-    fetchData();
-  }, [timeRange]);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8">
-      <div className="card bg-white shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Tic Intensity</h2>
-          <select 
-            onChange={(e) => setTimeRange(e.target.value)} 
+    <div className="w-full px-2 sm:px-4 py-4 sm:py-6">
+      <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Tic Intensity Over Time
+          </h2>
+          {/* 3. Add "All Time" as an option in the dropdown */}
+          <select
+            onChange={(e) => setTimeRange(e.target.value)}
             value={timeRange}
-            className="input bg-white border-gray-200 hover:border-primary focus:border-primary"
+            className="w-full sm:w-auto input bg-white border-gray-200 hover:border-primary focus:border-primary p-2 rounded text-sm"
           >
-            <option value="day">Today</option>
-            <option value="week">Last Week</option>
-            <option value="month">Last Month</option>
+            {Object.entries(timeRanges).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
         </div>
-        
-        <div className="h-[400px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+
+        {/* Toggleable buttons for each tic location */}
+        <div className="mb-4">
+          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
+            {myTics.map((tic) => (
+              <button
+                key={tic.name}
+                onClick={() => toggleTic(tic.name)}
+                className={`px-2 py-1.5 rounded-lg text-xs sm:text-sm font-medium truncate ${
+                  selectedTics.includes(tic.name)
+                    ? "bg-[#4a90a1] text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {tic.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-[300px] sm:h-[400px] w-full">
+          <ResponsiveContainer>
+            <LineChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{
+                top: 10,
+                right: 10,
+                left: 0,
+                bottom: 5
+              }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis 
-                dataKey={timeRange === "day" ? "timeOfDay" : "date"}
-                tick={{ fill: "#374151" }}
+              <XAxis
+                dataKey="timeKey"
+                tick={{ fill: "#374151", fontSize: "12px" }}
+                interval="preserveStartEnd"
+                angle={-45}
+                textAnchor="end"
+                height={50}
               />
-              <YAxis 
+              <YAxis
                 domain={[0, 10]}
-                tick={{ fill: "#374151" }}
-                label={{ value: "Intensity", angle: -90, position: 'insideLeft', fill: "#374151" }}
+                tick={{ fill: "#374151", fontSize: "12px" }}
+                label={{
+                  value: "Intensity",
+                  angle: -90,
+                  position: "insideLeft",
+                  fill: "#374151",
+                  fontSize: "12px",
+                  dx: -10
+                }}
+                width={40}
               />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                wrapperStyle={{ paddingTop: "20px" }}
-                formatter={(value) => <span className="text-sm font-medium">{value}</span>}
+              <Tooltip
+                wrapperStyle={{ fontSize: "12px" }}
+                contentStyle={{ fontSize: "12px" }}
               />
-              {ticTypes.map((tic) => (
-                <Bar 
-                  key={tic.id} 
-                  dataKey={tic.name} 
-                  fill={tic.color}
-                  radius={[4, 4, 0, 0]}
-                  cursor="pointer"
-                  maxBarSize={50}
-                />
-              ))}
-            </BarChart>
+              <Legend
+                wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                iconSize={8}
+              />
+
+              {/* Only show lines for selected tic locations */}
+              {myTics
+                .filter((tic) => selectedTics.includes(tic.name))
+                .map((tic) => (
+                  <Line
+                    key={tic.name}
+                    type="monotone"
+                    dataKey={tic.name}
+                    stroke={tic.color}
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 6 }}
+                  />
+                ))}
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -165,4 +317,4 @@ const TicBarChart = () => {
   );
 };
 
-export default TicBarChart;
+export default TicLineChart;
