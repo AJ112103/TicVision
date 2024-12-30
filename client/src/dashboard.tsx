@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+// import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Calendar, Clock, Plus, Sliders } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { db } from './firebase';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
+// import { db } from './firebase';
+// import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import LogTicModal from "./logticmodal";
 
 interface TicEntry {
@@ -18,36 +18,12 @@ const Dashboard = () => {
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [intensity, setIntensity] = useState(5);
   const [ticHistory, setTicHistory] = useState<TicEntry[]>([]);
-  const [showNamePopup, setShowNamePopup] = useState(true);
-  const [name, setName] = useState("");
-  const userId = localStorage.getItem("userId");
+  // const userId = localStorage.getItem("userId");
 
   const chartData = ticHistory.map((entry) => ({
     date: entry.timestamp.toISOString().split('T')[0],
     intensity: entry.intensity,
   }));
-
-  const checkUserName = async () => {
-    if (userId) {
-      const userRef = doc(db, "users", userId);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists() && !userDoc.data().name) {
-        setShowNamePopup(true);
-      }
-    }
-  };
-
-  useEffect(() => {
-    checkUserName();
-  }, []);
-
-  const handleNameSubmit = async () => {
-    if (userId && name.trim()) {
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { name });
-      setShowNamePopup(false);
-    }
-  };
 
   const handleLocationSelect = (location: string) => {
     setSelectedLocation(location);
@@ -74,45 +50,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AnimatePresence>
-        {showNamePopup && (
-          <motion.div
-            className="popup-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="popup-content"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-            >
-              <h2 className="popup-title">Welcome to Your Dashboard! 👋</h2>
-              <p className="popup-description">
-                To personalize your experience and make it more welcoming, 
-                we'd love to know what to call you.
-              </p>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="popup-input"
-                placeholder="Your name"
-                autoFocus
-              />
-              <button
-                onClick={handleNameSubmit}
-                className="btn-primary w-full mt-6"
-                disabled={!name.trim()}
-              >
-                Get Started
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <main className="container mx-auto px-6 py-8">
         <div className="space-y-6">
           <div className="card">
