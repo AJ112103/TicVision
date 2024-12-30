@@ -1,19 +1,51 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+admin.initializeApp();
+const db = admin.firestore();
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+exports.addTic = functions.https.onCall(async (data: { date: any; timeOfDay: any; location: any; intensity: any; }, context: { auth: { uid: any; }; }) => {
+    console.log("Full Context:", JSON.stringify(context, null, 2));
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    if (!context.auth) {
+        console.log("User not authenticated");
+        throw new functions.https.HttpsError("unauthenticated", "User must be authenticated.");
+    }
+
+    const { date, timeOfDay, location, intensity } = data;
+
+    // Validate the input data
+    if (!date || !timeOfDay || !location || !intensity) {
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "All tic data fields (date, timeOfDay, location, intensity) are required."
+        );
+    }
+
+    try {
+        const userId = context.auth.uid;
+
+        const newTic = {
+            date,
+            timeOfDay,
+            location,
+            intensity,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        await db
+            .collection("users")
+            .doc(userId)
+            .collection("ticHistory")
+            .add(newTic);
+
+        return { success: true, message: "Tic added successfully!" };
+    } catch (error) {
+        console.error("Error adding tic: ", error);
+        throw new functions.https.HttpsError(
+            "internal",
+            "An error occurred while adding the tic."
+        );
+    }
+});
+
