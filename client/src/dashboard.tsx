@@ -1,51 +1,20 @@
 import { useState } from 'react';
-// import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Calendar, Clock, Plus, Sliders } from 'lucide-react';
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-// import { db } from './firebase';
-// import { doc, updateDoc, getDoc } from 'firebase/firestore';
+
+type TicEntry = {
+  intensity: number;
+  timestamp: string;
+};
+import { Activity, Calendar, Clock, Sliders } from 'lucide-react';
+import TicBarChart from "./graph";
+import { useNavigate } from "react-router-dom";
 import LogTicModal from "./logticmodal";
 
-interface TicEntry {
-  id: string;
-  location: string;
-  intensity: number;
-  timestamp: Date;
-  notes?: string;
-}
-
 const Dashboard = () => {
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [intensity, setIntensity] = useState(5);
-  const [ticHistory, setTicHistory] = useState<TicEntry[]>([]);
-  // const userId = localStorage.getItem("userId");
+  const [ticHistory] = useState<TicEntry[]>([]);
+  const navigate = useNavigate();
 
-  const chartData = ticHistory.map((entry) => ({
-    date: entry.timestamp.toISOString().split('T')[0],
-    intensity: entry.intensity,
-  }));
-
-  const handleLocationSelect = (location: string) => {
-    setSelectedLocation(location);
-  };
-
-  const handleIntensityChange = (value: number) => {
-    setIntensity(value);
-  };
-
-  const handleSubmit = () => {
-    if (!selectedLocation) return;
-
-    const newEntry: TicEntry = {
-      id: Date.now().toString(),
-      location: selectedLocation,
-      intensity,
-      timestamp: new Date(),
-    };
-
-    setTicHistory([...ticHistory, newEntry]);
-    setSelectedLocation(null);
-    setIntensity(5);
+  const handleGraphClick = () => {
+    navigate("/graph");
   };
 
   return (
@@ -91,40 +60,9 @@ const Dashboard = () => {
             <div className="card lg:col-span-1">
               <LogTicModal />
             </div>
-            <div className="card lg:col-span-2">
+            <div className="card lg:col-span-2 cursor-pointer" onClick={handleGraphClick}>
               <h2 className="text-xl font-bold mb-6">Tic History</h2>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsLineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 12, fill: '#6B7280' }}
-                      stroke="#E5E7EB"
-                    />
-                    <YAxis
-                      tick={{ fontSize: 12, fill: '#6B7280' }}
-                      stroke="#E5E7EB"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="intensity"
-                      stroke="#6366F1"
-                      strokeWidth={2}
-                      dot={{ stroke: '#6366F1', strokeWidth: 2, r: 4, fill: 'white' }}
-                      activeDot={{ stroke: '#6366F1', strokeWidth: 2, r: 6, fill: 'white' }}
-                    />
-                  </RechartsLineChart>
-                </ResponsiveContainer>
-              </div>
+              <TicBarChart />
             </div>
           </div>
         </div>

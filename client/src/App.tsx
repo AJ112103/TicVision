@@ -8,8 +8,9 @@ import Index from "./index";
 import Login from "./login";
 import Dashboard from "./dashboard";
 import Profile from "./profile";
-import Navbar from "./navbar";
 import LogNewTic from "./lognewtic";
+import TicBarChart from "./graph";
+import Navbar from "./navbar";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ const App = () => {
   }, []);
 
   if (!authChecked) {
-    return null; // loading spinner
+    return null;
   }
 
   return (
@@ -44,7 +45,7 @@ const App = () => {
       <AnimatePresence mode="wait">
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} /> {/* Updated to allow access to index */}
+            <Route path="/" element={<Index />} />
             <Route
               path="/login"
               element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
@@ -80,6 +81,18 @@ const App = () => {
                 isAuthenticated ? (
                   <AuthenticatedLayout>
                     <Profile />
+                  </AuthenticatedLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/graph"
+              element={
+                isAuthenticated ? (
+                  <AuthenticatedLayout>
+                    <TicBarChart />
                   </AuthenticatedLayout>
                 ) : (
                   <Navigate to="/login" />
