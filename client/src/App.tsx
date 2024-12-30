@@ -9,6 +9,7 @@ import Login from "./login";
 import Dashboard from "./dashboard";
 import Profile from "./profile";
 import Navbar from "./navbar";
+import LogNewTic from "./lognewtic";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,18 @@ const App = () => {
                 isAuthenticated ? (
                   <AuthenticatedLayout>
                     <Dashboard />
+                  </AuthenticatedLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/logtic/:ticType"
+              element={
+                isAuthenticated ? (
+                  <AuthenticatedLayout>
+                    <LogNewTic />
                   </AuthenticatedLayout>
                 ) : (
                   <Navigate to="/login" />
