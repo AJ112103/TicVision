@@ -48,7 +48,7 @@ const Index: React.FC = () => {
                 <Link to="/login" className="btn-secondary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
                   Sign In
                 </Link>
-                <Link to="/register" className="btn-primary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
+                <Link to="/register" className="btn-secondary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
                   Get Started
                 </Link>
               </>

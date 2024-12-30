@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from './firebase';
-import { UserCircleIcon } from '@heroicons/react/solid'; // Using HeroIcons for the user icon
+import { UserCircleIcon } from '@heroicons/react/solid';
 import './profile.css'
 
 const ProfilePage = () => {
@@ -24,7 +24,7 @@ const ProfilePage = () => {
         if (userDoc.exists()) {
           const user = userDoc.data();
           setUserData({
-            name: user.name || 'Anonymous',
+            name: user.displayName || 'Anonymous',
             email: user.email || 'Not Provided',
             totalTics: user.totalTics || 0,
             avgIntensity: user.avgIntensity?.toFixed(1) || '0',
