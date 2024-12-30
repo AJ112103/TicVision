@@ -1,0 +1,46 @@
+/* Navbar Container */
+.navbar {
+    @apply flex items-center justify-between w-full bg-[#4a90a1] shadow-md px-4 py-3;
+  }
+  
+  /* Navbar Inner Container */
+  .navbar .container {
+    @apply mx-auto flex justify-between items-center;
+  }
+  
+  /* Logo Styling */
+  .navbar .logo {
+    @apply text-xl font-bold text-white;
+  }
+  
+  /* Navigation Link Styles */
+  .navbar .nav-link {
+    @apply block py-2 px-4 text-white font-medium transition-all hover:text-gray-200;
+  }
+  
+  .navbar .nav-link.active {
+    @apply text-gray-200 font-bold;
+  }
+  
+  /* Mobile Menu Button */
+  .navbar .menu-button {
+    @apply md:hidden focus:outline-none;
+  }
+  
+  /* Mobile Menu */
+  .navbar .mobile-menu {
+    @apply absolute top-16 left-0 w-full bg-[#4a90a1] shadow-md md:static md:w-auto md:shadow-none;
+    z-index: 10;
+  }
+  
+  /* Mobile Menu Layout for Desktop */
+  @media (min-width: 768px) {
+    .navbar .mobile-menu {
+      @apply flex flex-row items-center justify-end space-x-6;
+    }
+  
+    .navbar .menu-button {
+      @apply hidden;
+    }
+  }
+  

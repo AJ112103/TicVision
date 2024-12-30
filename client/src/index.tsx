@@ -76,13 +76,20 @@ const Index: React.FC = () => {
               TicVision helps you track, understand, and manage your tics with powerful visualization tools and personalized insights.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 sm:justify-center">
-              <button
-                onClick={handleStartJourney}
-                className="btn-primary group w-full sm:w-auto text-sm sm:text-base"
-              >
-                Start Your Journey
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
+            <button
+              onClick={handleStartJourney}
+              className="group w-full sm:w-auto text-sm sm:text-base flex items-center justify-center gap-2 px-4 py-2"
+              style={{
+                backgroundColor: '#4a90a1',
+                color: '#fff',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '0.5rem',
+                fontWeight: '500',
+              }}
+            >
+              Start Your Journey
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
               <Link
                 to="/learn-more"
                 className="btn-secondary w-full sm:w-auto text-sm sm:text-base"

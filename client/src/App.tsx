@@ -7,8 +7,19 @@ import { auth } from "./firebase";
 import Index from "./index";
 import Login from "./login";
 import Dashboard from "./dashboard";
+import Profile from "./profile";
+import Navbar from "./navbar";
 
 const queryClient = new QueryClient();
+
+const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <>
+      <Navbar />
+      <div>{children}</div>
+    </>
+  );
+};
 
 const App = () => {
   const [authChecked, setAuthChecked] = useState(false);
@@ -24,7 +35,7 @@ const App = () => {
   }, []);
 
   if (!authChecked) {
-    return null; // Or a loading spinner
+    return null; // loading spinner
   }
 
   return (
@@ -32,10 +43,7 @@ const App = () => {
       <AnimatePresence mode="wait">
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Index />}
-            />
+            <Route path="/" element={<Index />} /> {/* Updated to allow access to index */}
             <Route
               path="/login"
               element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
@@ -43,7 +51,27 @@ const App = () => {
             <Route path="/register" element={<Login />} />
             <Route
               path="/dashboard"
-              element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+              element={
+                isAuthenticated ? (
+                  <AuthenticatedLayout>
+                    <Dashboard />
+                  </AuthenticatedLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                isAuthenticated ? (
+                  <AuthenticatedLayout>
+                    <Profile />
+                  </AuthenticatedLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
             />
           </Routes>
         </BrowserRouter>

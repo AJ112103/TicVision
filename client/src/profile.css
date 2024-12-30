@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 font-body text-gray-800 antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply btn bg-blue-600 text-white hover:bg-blue-700;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300;
+  }
+
+  .card {
+    @apply rounded-xl bg-white p-6 shadow-md transition-all duration-200;
+  }
+
+  .input {
+    @apply rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 outline-none transition-all duration-200 focus:border-blue-600;
+  }
+
+  .label {
+    @apply mb-2 block text-sm font-medium text-gray-600;
+  }
+}
+
+.profile-page {
+  @apply min-h-screen flex flex-col items-center justify-center py-10;
+}
+
+.profile-title {
+  @apply text-3xl font-bold text-gray-900 mb-8;
+}
+
+.profile-card {
+  @apply card w-full max-w-md flex flex-col items-center text-center p-8;
+}
+
+.profile-icon {
+  @apply w-24 h-24 bg-blue-600 text-white rounded-full flex items-center justify-center text-4xl mb-6;
+}
+
+.profile-card p {
+  @apply text-lg text-gray-700 mb-2;
+}
+
+.profile-card p strong {
+  @apply text-gray-900;
+}
