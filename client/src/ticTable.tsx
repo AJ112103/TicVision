@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import './ticTable.css';
@@ -14,13 +15,9 @@ const TicTable: React.FC = () => {
   const [ticData, setTicData] = useState<TicData[]>([]);
   const [filteredData, setFilteredData] = useState<TicData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
-  // Filter states
   const [timeRangeFilter, setTimeRangeFilter] = useState<string>('all');
   const [specificDate, setSpecificDate] = useState<string>('');
   const [locationFilter, setLocationFilter] = useState<string[]>([]);
-
-  // Unique locations for the toggle buttons
   const [uniqueLocations, setUniqueLocations] = useState<string[]>([]);
 
   useEffect(() => {
@@ -124,18 +121,32 @@ const TicTable: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl mb-4">Tic History</h2>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="p-6"
+    >
+      <motion.h2 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-2xl mb-4"
+      >
+        Tic History
+      </motion.h2>
 
-      {/* Filters */}
-      <div className="card mb-6 p-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="card mb-6 p-4"
+      >
         <h3 className="text-xl mb-4">Filters</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Time Range Filter */}
           <div>
-            <label className="label" htmlFor="timeRange">
-              Time Range
-            </label>
+            <label className="label" htmlFor="timeRange">Time Range</label>
             <select
               id="timeRange"
               className="input w-full"
@@ -155,10 +166,13 @@ const TicTable: React.FC = () => {
 
           {/* Specific Date Picker */}
           {timeRangeFilter === 'specificDate' && (
-            <div>
-              <label className="label" htmlFor="specificDate">
-                Select Date
-              </label>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <label className="label" htmlFor="specificDate">Select Date</label>
               <input
                 type="date"
                 id="specificDate"
@@ -166,20 +180,21 @@ const TicTable: React.FC = () => {
                 value={specificDate}
                 onChange={e => setSpecificDate(e.target.value)}
               />
-            </div>
+            </motion.div>
           )}
 
-          {/* Location Filter as Toggle Buttons */}
+          {/* Location Filter */}
           <div>
-            <label className="label" htmlFor="location">
-              Location
-            </label>
+            <label className="label" htmlFor="location">Location</label>
             <div className="flex flex-wrap gap-2 mt-1">
               {uniqueLocations.map((location, index) => {
                 const isSelected = locationFilter.includes(location);
                 return (
-                  <button
+                  <motion.button
                     key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
                     type="button"
                     onClick={() => toggleLocation(location)}
                     className={`px-3 py-1 rounded-full border ${
@@ -189,28 +204,44 @@ const TicTable: React.FC = () => {
                     } transition`}
                   >
                     {location}
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
           </div>
         </div>
 
-        <div className="mt-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-4"
+        >
           <button
             className="btn btn-secondary"
             onClick={handleResetFilters}
           >
             Reset Filters
           </button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Loading Indicator */}
       {loading ? (
-        <div className="text-center">Loading...</div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="text-center"
+        >
+          Loading...
+        </motion.div>
       ) : (
-        <div className="overflow-x-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="overflow-x-auto"
+        >
           <table className="min-w-full bg-white rounded-lg overflow-hidden tic-table">
             <thead className="bg-primary text-white">
               <tr>
@@ -222,49 +253,38 @@ const TicTable: React.FC = () => {
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
-                <tr>
+                <motion.tr
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <td colSpan={4} className="text-center py-4">
                     No data available.
                   </td>
-                </tr>
+                </motion.tr>
               ) : (
                 filteredData.map((tic, index) => (
-                  <tr
+                  <motion.tr
                     key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                   >
-                    <td
-                      data-label="Time of Day"
-                      className="py-3 px-6"
-                    >
-                      {tic.timeOfDay}
-                    </td>
-                    <td
-                      data-label="Location"
-                      className="py-3 px-6"
-                    >
-                      {tic.location}
-                    </td>
-                    <td
-                      data-label="Intensity"
-                      className="py-3 px-6"
-                    >
-                      {tic.intensity}
-                    </td>
-                    <td
-                      data-label="Date"
-                      className="py-3 px-6"
-                    >
+                    <td data-label="Time of Day" className="py-3 px-6">{tic.timeOfDay}</td>
+                    <td data-label="Location" className="py-3 px-6">{tic.location}</td>
+                    <td data-label="Intensity" className="py-3 px-6">{tic.intensity}</td>
+                    <td data-label="Date" className="py-3 px-6">
                       {new Date(tic.date).toLocaleDateString()}
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
