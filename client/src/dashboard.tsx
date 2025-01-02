@@ -1,6 +1,6 @@
-import TicBarChart from "./graphmodal";
 import { useNavigate } from "react-router-dom";
 import LogTicModal from "./logticmodal";
+import TodayTicsBarChart from "./graphmodal";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ const Dashboard = () => {
             </div>
             <div className="card lg:col-span-2 cursor-pointer" onClick={handleGraphClick}>
               <h2 className="text-xl font-bold mb-6">Tic History</h2>
-              <TicBarChart />
+              <TodayTicsBarChart />
             </div>
           </div>
         </div>
