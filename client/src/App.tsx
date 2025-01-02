@@ -11,6 +11,7 @@ import Profile from "./profile";
 import LogNewTic from "./lognewtic";
 import TicBarChart from "./graph";
 import Navbar from "./navbar";
+import TicTable from "./ticTable"; // Importing the TicTable component
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,7 @@ const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      <div>{children}</div>
+      <div className="p-4">{children}</div> {/* Added padding for better layout */}
     </>
   );
 };
@@ -37,7 +38,11 @@ const App = () => {
   }, []);
 
   if (!authChecked) {
-    return null;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    ); // Optional: Add a loading indicator while auth is being checked
   }
 
   return (
@@ -99,6 +104,21 @@ const App = () => {
                 )
               }
             />
+            {/* New /table Route */}
+            <Route
+              path="/table"
+              element={
+                isAuthenticated ? (
+                  <AuthenticatedLayout>
+                    <TicTable />
+                  </AuthenticatedLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            {/* Optional: Catch-all route for undefined paths */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </BrowserRouter>
       </AnimatePresence>

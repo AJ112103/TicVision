@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { UserCircleIcon } from '@heroicons/react/solid';
-import './profile.css'
+import { useNavigate } from 'react-router-dom';
+import { signOut } from 'firebase/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ProfilePage = () => {
   const [userData, setUserData] = useState({
     name: '',
     email: '',
-    totalTics: 0,
-    avgIntensity: 0,
-    lastEntry: '--:--',
   });
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
+  const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -26,11 +27,6 @@ const ProfilePage = () => {
           setUserData({
             name: user.displayName || 'Anonymous',
             email: user.email || 'Not Provided',
-            totalTics: user.totalTics || 0,
-            avgIntensity: user.avgIntensity?.toFixed(1) || '0',
-            lastEntry: user.lastEntry
-              ? new Date(user.lastEntry).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              : '--:--',
           });
         }
       }
@@ -39,19 +35,90 @@ const ProfilePage = () => {
     fetchUserData();
   }, [userId]);
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem('userId');
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      alert('Logout failed. Please try again.');
+    }
+  };
+
   return (
-    <div className="profile-page">
-      <h1 className="profile-title">Your Profile</h1>
-      <div className="profile-card">
-        <div className="profile-icon">
-          <UserCircleIcon className="w-full h-full" />
-        </div>
-        <p><strong>Name:</strong> {userData.name}</p>
-        <p><strong>Email:</strong> {userData.email}</p>
-        <p><strong>Total Tics Logged:</strong> {userData.totalTics}</p>
-        <p><strong>Average Intensity:</strong> {userData.avgIntensity}</p>
-        <p><strong>Last Tic Entry:</strong> {userData.lastEntry}</p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-6">
+      <div className="w-full max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center"
+        >
+          <motion.div
+            className="w-32 h-32 mb-8 rounded-full bg-secondary/20 flex items-center justify-center -mt-12"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
+            <UserCircleIcon className="w-24 h-24 text-gray-400" />
+          </motion.div>
+
+          <h1 className="text-4xl font-display font-bold mb-8 text-center">Your Profile</h1>
+          
+          <div className="card w-full">
+            <div className="space-y-6 w-full">
+              <div className="profile-field">
+                <b className="profile-label">Name: </b>
+                <span className="profile-value">{userData.name}</span>
+              </div>
+              <div className="profile-field">
+                <b className="profile-label">Email: </b>
+                <span className="profile-value">{userData.email}</span>
+              </div>
+              
+              <button
+                className="btn btn-primary w-full mt-8"
+                onClick={() => setIsLogoutModalOpen(true)}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </motion.div>
       </div>
+
+      <AnimatePresence>
+        {isLogoutModalOpen && (
+          <motion.div
+            className="modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="modal-content"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h2 className="text-2xl font-bold mb-4">Confirm Logout</h2>
+              <p className="mb-8 text-text-secondary">Are you sure you want to log out?</p>
+              <div className="flex gap-4">
+                <button className="btn btn-primary flex-1" onClick={handleLogout}>
+                  Yes, Logout
+                </button>
+                <button
+                  className="btn btn-secondary flex-1"
+                  onClick={() => setIsLogoutModalOpen(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

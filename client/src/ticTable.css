@@ -1,0 +1,42 @@
+.tic-table th {
+    @apply text-sm font-medium text-left;
+  }
+  
+  .tic-table td {
+    @apply text-sm text-text-primary;
+  }
+  
+  /* Responsive table styling */
+  @media (max-width: 768px) {
+    .tic-table thead {
+      @apply hidden;
+    }
+  
+    .tic-table tr {
+      @apply mb-4 block border-b-2;
+    }
+  
+    .tic-table td {
+      @apply block text-right relative;
+    }
+  
+    .tic-table td::before {
+      content: attr(data-label);
+      @apply absolute left-0 top-0 text-left font-bold;
+    }
+  }
+  
+  /* Custom styles for toggle buttons */
+  button {
+    cursor: pointer;
+  }
+  
+  button:focus {
+    outline: none;
+  }
+  
+  /* Ensure buttons don't grow too large on small screens */
+  button {
+    white-space: nowrap;
+  }
+  

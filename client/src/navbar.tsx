@@ -11,8 +11,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar">
-      <div className="container">
+    <nav className="navbar bg-primary">
+      <div className="container flex items-center justify-between p-4">
         {/* Logo */}
         <Link to="/" className="logo text-xl font-bold text-white">
           TicVision
@@ -43,6 +43,17 @@ const Navbar = () => {
           >
             Dashboard
           </NavLink>
+
+          {/* New Tic Logs Link */}
+          <NavLink
+            to="/table"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Tic Logs
+          </NavLink>
+
           <NavLink
             to="/profile"
             className={({ isActive }) =>

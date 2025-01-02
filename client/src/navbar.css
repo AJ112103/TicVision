@@ -1,46 +1,155 @@
+/* navbar.css */
+
 /* Navbar Container */
 .navbar {
-    @apply flex items-center justify-between w-full bg-[#4a90a1] shadow-md px-4 py-3;
-  }
-  
-  /* Navbar Inner Container */
-  .navbar .container {
-    @apply mx-auto flex justify-between items-center;
-  }
-  
-  /* Logo Styling */
-  .navbar .logo {
-    @apply text-xl font-bold text-white;
-  }
-  
-  /* Navigation Link Styles */
-  .navbar .nav-link {
-    @apply block py-2 px-4 text-white font-medium transition-all hover:text-gray-200;
-  }
-  
-  .navbar .nav-link.active {
-    @apply text-gray-200 font-bold;
-  }
-  
-  /* Mobile Menu Button */
-  .navbar .menu-button {
-    @apply md:hidden focus:outline-none;
-  }
-  
-  /* Mobile Menu */
+  @apply flex items-center justify-between w-full bg-[#4a90a1] shadow-md px-4 py-3;
+}
+
+/* Navbar Inner Container */
+.navbar .container {
+  @apply mx-auto flex justify-between items-center;
+}
+
+/* Logo Styling */
+.navbar .logo {
+  @apply text-xl font-bold text-white;
+}
+
+/* Navigation Link Styles */
+.navbar .nav-link {
+  @apply block py-2 px-4 text-white font-medium transition-all hover:text-gray-200;
+}
+
+.navbar .nav-link.active {
+  @apply text-gray-200 font-bold;
+}
+
+/* Mobile Menu Button */
+.navbar .menu-button {
+  @apply md:hidden focus:outline-none;
+}
+
+/* Mobile Menu */
+.navbar .mobile-menu {
+  @apply absolute top-16 left-0 w-full bg-[#4a90a1] shadow-md md:static md:w-auto md:shadow-none;
+  z-index: 10;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}
+
+/* Mobile Menu Open State */
+.navbar .mobile-menu.open {
+  max-height: 500px; /* Arbitrary high value to accommodate menu items */
+}
+
+/* Mobile Menu Layout for Desktop */
+@media (min-width: 768px) {
   .navbar .mobile-menu {
-    @apply absolute top-16 left-0 w-full bg-[#4a90a1] shadow-md md:static md:w-auto md:shadow-none;
-    z-index: 10;
+    @apply flex flex-row items-center justify-end space-x-6;
+    max-height: none; /* Remove max-height for desktop view */
   }
-  
-  /* Mobile Menu Layout for Desktop */
-  @media (min-width: 768px) {
-    .navbar .mobile-menu {
-      @apply flex flex-row items-center justify-end space-x-6;
-    }
-  
-    .navbar .menu-button {
-      @apply hidden;
-    }
+
+  .navbar .menu-button {
+    @apply hidden;
   }
-  
+}
+
+/* Adjusting Link Spacing */
+.navbar .nav-link {
+  @apply px-3 py-2;
+}
+
+/* Button Styles for Toggle */
+.navbar button {
+  @apply focus:outline-none;
+}
+
+/* Ensuring the Mobile Menu Covers Full Width on Mobile */
+@media (max-width: 767px) {
+  .navbar .mobile-menu {
+    width: 100%;
+  }
+
+  .navbar .nav-link {
+    text-align: center;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .navbar .nav-link:first-child {
+    border-top: none;
+  }
+}
+
+.logout-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.modal-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.modal-button.yes {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.modal-button.yes:hover {
+  background-color: #c0392b;
+}
+
+.modal-button.no {
+  background-color: #bdc3c7;
+  color: white;
+}
+
+.modal-button.no:hover {
+  background-color: #95a5a6;
+}
