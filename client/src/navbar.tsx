@@ -11,15 +11,15 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar bg-primary">
-      <div className="container flex items-center justify-between p-4">
+    <nav className="navbar">
+      <div className="container">
         {/* Logo */}
-        <Link to="/" className="logo text-xl font-bold text-white">
+        <Link to="/" className="logo">
           TicVision
         </Link>
 
         {/* Hamburger Menu for Mobile */}
-        <div className="menu-button md:hidden">
+        <div className="menu-button">
           <button onClick={toggleMenu} className="focus:outline-none">
             {isOpen ? (
               <XIcon className="h-6 w-6 text-white" />
@@ -31,9 +31,7 @@ const Navbar = () => {
 
         {/* Navigation Links */}
         <div
-          className={`mobile-menu ${
-            isOpen ? "block" : "hidden"
-          } md:flex md:items-center md:space-x-6`}
+          className={`mobile-menu ${isOpen ? "open" : ""} md:flex md:items-center md:space-x-6`}
         >
           <NavLink
             to="/dashboard"
@@ -43,17 +41,6 @@ const Navbar = () => {
           >
             Dashboard
           </NavLink>
-
-          {/* New Tic Logs Link */}
-          <NavLink
-            to="/table"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
-            Tic Logs
-          </NavLink>
-
           <NavLink
             to="/profile"
             className={({ isActive }) =>
@@ -61,6 +48,14 @@ const Navbar = () => {
             }
           >
             Profile
+          </NavLink>
+          <NavLink
+            to="/table"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Tic Table
           </NavLink>
         </div>
       </div>
