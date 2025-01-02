@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
+import { Chart } from "react-google-charts";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from "recharts";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+  getFirestore,
+  collection,
+  getDocs
+} from "firebase/firestore";
 import { auth } from "./firebase";
 
+// Define the shape of a TicData record
 interface TicData {
   timeOfDay: string;
   date: string;
@@ -19,13 +15,14 @@ interface TicData {
   location: string; // the tic “type”
 }
 
+// Define the shape of a MyTic object
 interface MyTic {
-  name: string;  
+  name: string;
   count: number;
   color: string;
 }
 
-// 1. Add "all" to your time range options
+// Define timeRanges as a constant with 'as const' to ensure literal types
 const timeRanges = {
   all: "All Time",
   day: "Today",
@@ -34,11 +31,14 @@ const timeRanges = {
   threeMonths: "Last 3 Months",
   sixMonths: "Last 6 Months",
   year: "Last Year"
-};
+} as const;
+
+// Create a TypeScript type that represents the keys of timeRanges
+type TimeRangeKey = keyof typeof timeRanges;
 
 const TicLineChart = () => {
-  // 2. Default the timeRange to "all"
-  const [timeRange, setTimeRange] = useState("all");
+  // Update useState to use the TimeRangeKey type
+  const [timeRange, setTimeRange] = useState<TimeRangeKey>("all");
   const [chartData, setChartData] = useState<any[]>([]);
   const [myTics, setMyTics] = useState<MyTic[]>([]);
   const [selectedTics, setSelectedTics] = useState<string[]>([]);
@@ -54,13 +54,13 @@ const TicLineChart = () => {
       const myTicsCollection = collection(db, "users", user.uid, "mytics");
       const snapshot = await getDocs(myTicsCollection);
 
-      const tics = snapshot.docs.map(doc => {
+      const tics: MyTic[] = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
-          name: data.name, 
+          name: data.name,
           count: data.count,
           // Random color
-          color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+          color: `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
         };
       });
 
@@ -83,14 +83,14 @@ const TicLineChart = () => {
     try {
       const historyCollection = collection(db, "users", user.uid, "ticHistory");
       const snapshot = await getDocs(historyCollection);
-      const ticData = snapshot.docs.map(doc => {
+      const ticData: TicData[] = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           timeOfDay: data.timeOfDay,
           date: data.date,
           intensity: data.intensity,
           location: data.location,
-          id: doc.id
+          // Removed 'id' as it's not defined in TicData interface
         } as TicData;
       });
 
@@ -194,21 +194,81 @@ const TicLineChart = () => {
   // Fetch ticHistory whenever timeRange changes
   useEffect(() => {
     fetchTicHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange]);
 
-  // Toggle lines by location
-  const toggleTic = (ticName: string) => {
-    setSelectedTics(prev =>
-      prev.includes(ticName)
-        ? prev.filter(name => name !== ticName)
-        : [...prev, ticName]
-    );
+  // Handler for changing selected tics via dropdown
+  const handleTicSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setSelectedTics(selectedOptions);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-48">
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
+      </div>
+    );
+  }
+
+  // Prepare data for Google Charts
+  const prepareChartData = () => {
+    if (chartData.length === 0 || myTics.length === 0) {
+      return [];
+    }
+
+    // Filter myTics based on selectedTics
+    const filteredMyTics = myTics.filter(tic => selectedTics.includes(tic.name));
+
+    if (filteredMyTics.length === 0) {
+      return [];
+    }
+
+    // Header row
+    const header = ["Time", ...filteredMyTics.map(tic => tic.name)];
+
+    // Data rows
+    const rows = chartData.map(entry => {
+      const row = [entry.timeKey];
+      filteredMyTics.forEach(tic => {
+        row.push(entry[tic.name] || 0);
+      });
+      return row;
+    });
+
+    return [header, ...rows];
+  };
+
+  // Define chart options
+  const chartOptions = {
+    title: "Tic Intensity Over Time",
+    curveType: "function",
+    legend: { position: "bottom" },
+    hAxis: {
+      title: timeRanges[timeRange],
+      slantedText: true,
+      slantedTextAngle: 45
+    },
+    vAxis: {
+      title: "Intensity",
+      minValue: 0,
+      // Optionally, dynamically set maxValue based on data
+    },
+    colors: myTics
+      .filter(tic => selectedTics.includes(tic.name))
+      .map(tic => tic.color),
+    // Optionally, control series visibility here if needed
+  };
+
+  const filteredChartData = prepareChartData();
+
+  // If no data, show a message
+  if (filteredChartData.length === 0) {
+    return (
+      <div className="w-full px-2 sm:px-4 py-4 sm:py-6">
+        <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6">
+          <p className="text-center text-gray-500">No data available for the selected range or tic types.</p>
+        </div>
       </div>
     );
   }
@@ -220,9 +280,9 @@ const TicLineChart = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
             Tic Intensity Over Time
           </h2>
-          {/* 3. Add "All Time" as an option in the dropdown */}
+          {/* Time Range Dropdown */}
           <select
-            onChange={(e) => setTimeRange(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTimeRange(e.target.value as TimeRangeKey)}
             value={timeRange}
             className="w-full sm:w-auto input bg-white border-gray-200 hover:border-primary focus:border-primary p-2 rounded text-sm"
           >
@@ -234,83 +294,43 @@ const TicLineChart = () => {
           </select>
         </div>
 
-        {/* Toggleable buttons for each tic location */}
+        {/* Multi-Select Dropdown for Tic Types */}
         <div className="mb-4">
-          <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-1.5">
+          <label htmlFor="tic-select" className="block text-sm font-medium text-gray-700 mb-1">
+            Select Tic Types:
+          </label>
+          <select
+            id="tic-select"
+            multiple
+            value={selectedTics}
+            onChange={handleTicSelection}
+            className="w-full sm:w-auto block bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary p-2 text-sm"
+            size={Math.min(5, myTics.length)} // Adjust size based on number of tics
+          >
             {myTics.map((tic) => (
-              <button
-                key={tic.name}
-                onClick={() => toggleTic(tic.name)}
-                className={`px-2 py-1.5 rounded-lg text-xs sm:text-sm font-medium truncate ${
-                  selectedTics.includes(tic.name)
-                    ? "bg-[#4a90a1] text-white"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
+              <option key={tic.name} value={tic.name}>
                 {tic.name}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
+          <p className="text-xs text-gray-500 mt-1">
+            Hold down the Ctrl (windows) or Command (Mac) button to select multiple tics.
+          </p>
         </div>
 
         <div className="h-[300px] sm:h-[400px] w-full">
-          <ResponsiveContainer>
-            <LineChart
-              data={chartData}
-              margin={{
-                top: 10,
-                right: 10,
-                left: 0,
-                bottom: 5
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis
-                dataKey="timeKey"
-                tick={{ fill: "#374151", fontSize: "12px" }}
-                interval="preserveStartEnd"
-                angle={-45}
-                textAnchor="end"
-                height={50}
-              />
-              <YAxis
-                domain={[0, 10]}
-                tick={{ fill: "#374151", fontSize: "12px" }}
-                label={{
-                  value: "Intensity",
-                  angle: -90,
-                  position: "insideLeft",
-                  fill: "#374151",
-                  fontSize: "12px",
-                  dx: -10
-                }}
-                width={40}
-              />
-              <Tooltip
-                wrapperStyle={{ fontSize: "12px" }}
-                contentStyle={{ fontSize: "12px" }}
-              />
-              <Legend
-                wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
-                iconSize={8}
-              />
-
-              {/* Only show lines for selected tic locations */}
-              {myTics
-                .filter((tic) => selectedTics.includes(tic.name))
-                .map((tic) => (
-                  <Line
-                    key={tic.name}
-                    type="monotone"
-                    dataKey={tic.name}
-                    stroke={tic.color}
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                    activeDot={{ r: 6 }}
-                  />
-                ))}
-            </LineChart>
-          </ResponsiveContainer>
+          <Chart
+            width={"100%"}
+            height={"100%"}
+            chartType="LineChart"
+            loader={
+              <div className="flex justify-center items-center h-full">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
+              </div>
+            }
+            data={filteredChartData}
+            options={chartOptions}
+          />
         </div>
       </div>
     </div>
