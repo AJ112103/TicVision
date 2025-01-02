@@ -1,42 +1,65 @@
+/* Table Heading Styling */
 .tic-table th {
-    @apply text-sm font-medium text-left;
+  @apply text-sm font-medium text-left;
+}
+
+/* Table Body Cell Styling */
+.tic-table td {
+  @apply text-sm text-text-primary; /* 'text-text-primary' would be a Tailwind custom color if you have it defined */
+}
+
+/* Enable horizontal scrolling on smaller devices */
+.tic-table {
+  @apply w-full;
+}
+
+/* 
+  --------
+  Mobile (<= 768px) Responsive Table
+  Hide thead and display each row as a "card" with labeled data in td::before 
+  --------
+*/
+@media (max-width: 768px) {
+  .tic-table thead {
+    @apply hidden; 
   }
-  
+
+  .tic-table tbody, .tic-table tr, .tic-table td {
+    @apply block w-full;
+  }
+
+  .tic-table tr {
+    @apply mb-4 border-b-2 border-gray-200;
+  }
+
   .tic-table td {
-    @apply text-sm text-text-primary;
+    @apply relative text-right p-3; 
   }
-  
-  /* Responsive table styling */
-  @media (max-width: 768px) {
-    .tic-table thead {
-      @apply hidden;
-    }
-  
-    .tic-table tr {
-      @apply mb-4 block border-b-2;
-    }
-  
-    .tic-table td {
-      @apply block text-right relative;
-    }
-  
-    .tic-table td::before {
-      content: attr(data-label);
-      @apply absolute left-0 top-0 text-left font-bold;
-    }
+
+  .tic-table td::before {
+    content: attr(data-label);
+    @apply absolute left-3 font-bold text-left; 
   }
-  
-  /* Custom styles for toggle buttons */
-  button {
-    cursor: pointer;
-  }
-  
-  button:focus {
-    outline: none;
-  }
-  
-  /* Ensure buttons don't grow too large on small screens */
-  button {
-    white-space: nowrap;
-  }
-  
+}
+
+/* Custom styles for toggle buttons */
+button {
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none;
+}
+
+button {
+  white-space: nowrap;
+}
+
+/* Example: If you want a specific color for .bg-primary, 
+   define it in your Tailwind config or override here: 
+.bg-primary {
+  background-color: #1DA1F2; 
+}
+*/
+
+/* Add more media queries or styles as needed for your design */

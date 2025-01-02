@@ -29,7 +29,6 @@ const TicTable: React.FC = () => {
 
   useEffect(() => {
     applyFilters();
-
   }, [ticData, timeRangeFilter, specificDate, locationFilter]);
 
   const fetchTicHistory = async () => {
@@ -96,7 +95,9 @@ const TicTable: React.FC = () => {
       });
     } else if (specificDate) {
       const selectedDate = new Date(specificDate).toDateString();
-      data = data.filter(tic => new Date(tic.date).toDateString() === selectedDate);
+      data = data.filter(
+        tic => new Date(tic.date).toDateString() === selectedDate
+      );
     }
 
     if (locationFilter.length > 0) {
@@ -127,7 +128,7 @@ const TicTable: React.FC = () => {
       <h2 className="text-2xl mb-4">Tic History</h2>
 
       {/* Filters */}
-      <div className="card mb-6">
+      <div className="card mb-6 p-4">
         <h3 className="text-xl mb-4">Filters</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Time Range Filter */}
@@ -137,7 +138,7 @@ const TicTable: React.FC = () => {
             </label>
             <select
               id="timeRange"
-              className="input"
+              className="input w-full"
               value={timeRangeFilter}
               onChange={e => setTimeRangeFilter(e.target.value)}
             >
@@ -161,7 +162,7 @@ const TicTable: React.FC = () => {
               <input
                 type="date"
                 id="specificDate"
-                className="input"
+                className="input w-full"
                 value={specificDate}
                 onChange={e => setSpecificDate(e.target.value)}
               />
@@ -194,8 +195,12 @@ const TicTable: React.FC = () => {
             </div>
           </div>
         </div>
+
         <div className="mt-4">
-          <button className="btn btn-secondary" onClick={handleResetFilters}>
+          <button
+            className="btn btn-secondary"
+            onClick={handleResetFilters}
+          >
             Reset Filters
           </button>
         </div>
@@ -224,11 +229,32 @@ const TicTable: React.FC = () => {
                 </tr>
               ) : (
                 filteredData.map((tic, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                    <td className="py-3 px-6">{tic.timeOfDay}</td>
-                    <td className="py-3 px-6">{tic.location}</td>
-                    <td className="py-3 px-6">{tic.intensity}</td>
-                    <td className="py-3 px-6">
+                  <tr
+                    key={index}
+                    className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+                  >
+                    <td
+                      data-label="Time of Day"
+                      className="py-3 px-6"
+                    >
+                      {tic.timeOfDay}
+                    </td>
+                    <td
+                      data-label="Location"
+                      className="py-3 px-6"
+                    >
+                      {tic.location}
+                    </td>
+                    <td
+                      data-label="Intensity"
+                      className="py-3 px-6"
+                    >
+                      {tic.intensity}
+                    </td>
+                    <td
+                      data-label="Date"
+                      className="py-3 px-6"
+                    >
                       {new Date(tic.date).toLocaleDateString()}
                     </td>
                   </tr>
