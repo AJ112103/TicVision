@@ -11,7 +11,7 @@ import Profile from "./profile";
 import LogNewTic from "./lognewtic";
 import TicBarChart from "./graph";
 import Navbar from "./navbar";
-import TicTable from "./ticTable"; // Importing the TicTable component
+import TicTable from "./ticTable"; 
 
 const queryClient = new QueryClient();
 
