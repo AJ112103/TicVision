@@ -245,10 +245,10 @@ const TicTable: React.FC = () => {
           <table className="min-w-full bg-white rounded-lg overflow-hidden tic-table">
             <thead className="bg-primary text-white">
               <tr>
+                <th className="py-3 px-6 text-left">Date</th>
                 <th className="py-3 px-6 text-left">Time of Day</th>
                 <th className="py-3 px-6 text-left">Location</th>
                 <th className="py-3 px-6 text-left">Intensity</th>
-                <th className="py-3 px-6 text-left">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -270,13 +270,13 @@ const TicTable: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
-                  >
-                    <td data-label="Time of Day" className="py-3 px-6">{tic.timeOfDay}</td>
-                    <td data-label="Location" className="py-3 px-6">{tic.location}</td>
-                    <td data-label="Intensity" className="py-3 px-6">{tic.intensity}</td>
+                  > 
                     <td data-label="Date" className="py-3 px-6">
                       {new Date(tic.date).toLocaleDateString()}
                     </td>
+                    <td data-label="Time of Day" className="py-3 px-6">{tic.timeOfDay}</td>
+                    <td data-label="Location" className="py-3 px-6">{tic.location}</td>
+                    <td data-label="Intensity" className="py-3 px-6">{tic.intensity}</td>
                   </motion.tr>
                 ))
               )}
