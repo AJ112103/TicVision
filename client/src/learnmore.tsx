@@ -35,7 +35,7 @@ const LearnMore: React.FC = () => {
               About <span className="text-primary">TicVision</span>
             </h2>
             <p className="text-base sm:text-lg text-text-secondary lg:text-xl">
-              TicVision is a comprehensive app designed to empower individuals with Tourette’s syndrome by offering tools to understand, track, and manage their tics effectively. Our mission is to provide a supportive platform that enhances the quality of life for our users through insightful data visualization and personalized management strategies.
+              TicVision is a comprehensive app designed to empower individuals with Tourette's syndrome by offering tools to understand, track, and manage their tics effectively. Our mission is to provide a supportive platform that enhances the quality of life for our users through insightful data visualization and personalized management strategies.
             </p>
           </motion.div>
         </section>
@@ -52,9 +52,9 @@ const LearnMore: React.FC = () => {
             <h2 className="mb-6 text-3xl sm:text-4xl font-bold">
               Key <span className="text-primary">Features</span>
             </h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto px-4">
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -70,7 +70,7 @@ const LearnMore: React.FC = () => {
               </motion.div>
 
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -100,9 +100,9 @@ const LearnMore: React.FC = () => {
             <h2 className="mb-6 text-3xl sm:text-4xl font-bold">
               Coming <span className="text-primary">Soon</span>
             </h2>
-            <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -118,7 +118,7 @@ const LearnMore: React.FC = () => {
               </motion.div>
 
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -134,7 +134,7 @@ const LearnMore: React.FC = () => {
               </motion.div>
 
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -150,7 +150,7 @@ const LearnMore: React.FC = () => {
               </motion.div>
 
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -166,7 +166,7 @@ const LearnMore: React.FC = () => {
               </motion.div>
 
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -182,7 +182,7 @@ const LearnMore: React.FC = () => {
               </motion.div>
 
               <motion.div
-                className="card group"
+                className="card group h-full"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
