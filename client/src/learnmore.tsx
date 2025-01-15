@@ -199,58 +199,6 @@ const LearnMore: React.FC = () => {
             </div>
           </motion.div>
         </section>
-
-        {/* Testimonials Section */}
-        <section className="py-12 sm:py-20 bg-gray-50">
-          <motion.div
-            className="mx-auto max-w-5xl text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="mb-6 text-3xl sm:text-4xl font-bold">
-              What <span className="text-primary">Users</span> Say
-            </h2>
-            <div className="space-y-6">
-              <motion.div
-                className="p-6 bg-white rounded-xl shadow-md"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-              >
-                <p className="text-sm sm:text-base text-text-secondary mb-4">
-                  "TicVision has been a game-changer for me. The tic tracking feature helps me understand my patterns better than ever before."
-                </p>
-                <div className="flex items-center justify-center">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <span className="ml-3 text-sm sm:text-base font-semibold">Jane Doe</span>
-                </div>
-              </motion.div>
-
-              <motion.div
-                className="p-6 bg-white rounded-xl shadow-md"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <p className="text-sm sm:text-base text-text-secondary mb-4">
-                  "The personalized insights have helped me manage my tics more effectively and reduce my stress levels significantly."
-                </p>
-                <div className="flex items-center justify-center">
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <MessageSquare className="h-6 w-6 text-primary" />
-                  </div>
-                  <span className="ml-3 text-sm sm:text-base font-semibold">John Smith</span>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        </section>
       </main>
 
       <footer className="border-t border-secondary bg-secondary-light mt-12 sm:mt-0">
