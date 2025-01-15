@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import { ArrowUpDown } from 'lucide-react';
 import './ticTable.css';
 
 interface TicData {
@@ -19,6 +20,7 @@ const TicTable: React.FC = () => {
   const [specificDate, setSpecificDate] = useState<string>('');
   const [locationFilter, setLocationFilter] = useState<string[]>([]);
   const [uniqueLocations, setUniqueLocations] = useState<string[]>([]);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     fetchTicHistory();
@@ -101,6 +103,13 @@ const TicTable: React.FC = () => {
       data = data.filter(tic => locationFilter.includes(tic.location));
     }
 
+    // Sort the data by date
+    data.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortDirection === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+
     setFilteredData(data);
   };
 
@@ -118,6 +127,19 @@ const TicTable: React.FC = () => {
         return [...prevSelected, location];
       }
     });
+  };
+
+  const toggleSort = () => {
+    const newDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+    setSortDirection(newDirection);
+    
+    const sortedData = [...filteredData].sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return newDirection === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+    
+    setFilteredData(sortedData);
   };
 
   return (
@@ -245,7 +267,18 @@ const TicTable: React.FC = () => {
           <table className="min-w-full bg-white rounded-lg overflow-hidden tic-table">
             <thead className="bg-primary text-white">
               <tr>
-                <th className="py-3 px-6 text-left">Date</th>
+                <th className="py-3 px-6 text-left">
+                  <div className="flex items-center gap-2">
+                    Date
+                    <button
+                      onClick={toggleSort}
+                      className="p-1 hover:bg-primary-dark rounded transition-colors"
+                      title={`Sort by date (${sortDirection === 'desc' ? 'newest first' : 'oldest first'})`}
+                    >
+                      <ArrowUpDown size={16} />
+                    </button>
+                  </div>
+                </th>
                 <th className="py-3 px-6 text-left">Time of Day</th>
                 <th className="py-3 px-6 text-left">Location</th>
                 <th className="py-3 px-6 text-left">Intensity</th>
