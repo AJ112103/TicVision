@@ -170,14 +170,22 @@ const LogTicModal = () => {
                 <button
                   key={tic.id}
                   onClick={() => handleTileClick(tic.name)}
-                  className="flex flex-col items-center justify-center p-4 bg-[#4a90a1] text-white rounded-lg hover:bg-[#3c7a8b]"
+                  className="flex flex-col items-center justify-center p-4 bg-[#4a90a1] text-white rounded-lg hover:bg-[#3c7a8b] w-full"
                 >
                   <img
                     src={tic.icon}
                     alt={tic.name}
                     className="-mb-3 w-20 h-15"
                   />
-                  <span className="text-sm font-medium">{tic.name}</span>
+                  <span
+                    className="text-sm font-medium break-words leading-tight text-center"
+                    style={{
+                      whiteSpace: "normal",
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {tic.name}
+                  </span>
                 </button>
               ))
             ) : (
