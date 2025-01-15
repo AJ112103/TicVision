@@ -12,6 +12,7 @@ import LogNewTic from "./lognewtic";
 import TicBarChart from "./graph";
 import Navbar from "./navbar";
 import TicTable from "./ticTable"; 
+import { LearnMore } from "./learnmore";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,12 @@ const App = () => {
             <Route
               path="/login"
               element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
+            />
+            <Route
+              path="/learn-more"
+              element={
+                <LearnMore/>
+              }
             />
             <Route path="/register" element={<Login />} />
             <Route
