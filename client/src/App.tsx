@@ -12,7 +12,7 @@ import LogNewTic from "./lognewtic";
 import TicBarChart from "./graph";
 import Navbar from "./navbar";
 import TicTable from "./ticTable"; 
-import { LearnMore } from "./learnmore";
+import LearnMore from "./learnmore";
 
 const queryClient = new QueryClient();
 
