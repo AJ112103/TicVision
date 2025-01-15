@@ -128,12 +128,9 @@ const Index: React.FC = () => {
               © {new Date().getFullYear()} TicVision. All rights reserved.
             </p>
             <div className="flex gap-4 sm:gap-6">
-              <Link to="/privacy" className="text-xs sm:text-sm text-text-secondary hover:text-primary">
+              <a href="https://www.termsfeed.com/live/7b535df7-4adb-424e-9592-321ef0e23384" className="text-xs sm:text-sm text-text-secondary hover:text-primary">
                 Privacy Policy
-              </Link>
-              <Link to="/terms" className="text-xs sm:text-sm text-text-secondary hover:text-primary">
-                Terms of Service
-              </Link>
+              </a>
             </div>
           </div>
         </div>
