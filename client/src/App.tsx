@@ -13,6 +13,7 @@ import TicBarChart from "./graph";
 import Navbar from "./navbar";
 import TicTable from "./ticTable"; 
 import LearnMore from "./learnmore";
+import Suggestions from "./suggestions";
 
 const queryClient = new QueryClient();
 
@@ -118,6 +119,18 @@ const App = () => {
                 isAuthenticated ? (
                   <AuthenticatedLayout>
                     <TicTable />
+                  </AuthenticatedLayout>
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
+            />
+            <Route
+              path="/suggestions"
+              element={
+                isAuthenticated ? (
+                  <AuthenticatedLayout>
+                    <Suggestions />
                   </AuthenticatedLayout>
                 ) : (
                   <Navigate to="/login" />

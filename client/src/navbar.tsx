@@ -81,6 +81,14 @@ const Navbar = () => {
             Tic Table
           </NavLink>
           <NavLink
+            to="/suggestions"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Suggestions
+          </NavLink>
+          <NavLink
             to="/profile"
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
@@ -119,6 +127,15 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 Tic Table
+              </NavLink>
+              <NavLink
+                to="/suggestions"
+                className={({ isActive }) =>
+                  `${isActive ? "nav-link active" : "nav-link"} block px-4 py-2 hover:bg-[#3a7a8a]`
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                Suggestions
               </NavLink>
               <NavLink
                 to="/profile"
