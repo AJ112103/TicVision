@@ -4,6 +4,8 @@ import { AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
+
+// Import all page components
 import Index from "./index";
 import Login from "./login";
 import Dashboard from "./dashboard";
@@ -11,17 +13,21 @@ import Profile from "./profile";
 import LogNewTic from "./lognewtic";
 import TicBarChart from "./graph";
 import Navbar from "./navbar";
-import TicTable from "./ticTable"; 
+import TicTable from "./ticTable";
 import LearnMore from "./learnmore";
 import Suggestions from "./suggestions";
 
+// Import the Footer component
+import Footer from "./footer";
+
 const queryClient = new QueryClient();
 
+// Layout for authenticated pages
 const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Navbar />
-      <div className="p-4">{children}</div> {/* Added padding for better layout */}
+      <div className="p-4">{children}</div>
     </>
   );
 };
@@ -44,7 +50,7 @@ const App = () => {
       <div className="flex items-center justify-center h-screen">
         <div className="text-xl">Loading...</div>
       </div>
-    ); // Optional: Add a loading indicator while auth is being checked
+    );
   }
 
   return (
@@ -52,18 +58,19 @@ const App = () => {
       <AnimatePresence mode="wait">
         <BrowserRouter>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route
               path="/login"
               element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
             />
+            <Route path="/register" element={<Login />} />
             <Route
               path="/learn-more"
-              element={
-                <LearnMore/>
-              }
+              element={<LearnMore />}
             />
-            <Route path="/register" element={<Login />} />
+
+            {/* Authenticated routes */}
             <Route
               path="/dashboard"
               element={
@@ -112,7 +119,6 @@ const App = () => {
                 )
               }
             />
-            {/* New /table Route */}
             <Route
               path="/table"
               element={
@@ -137,9 +143,13 @@ const App = () => {
                 )
               }
             />
-            {/* Optional: Catch-all route for undefined paths */}
+
+            {/* Catch-all route */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
+
+          {/* Footer shown on all pages */}
+          <Footer />
         </BrowserRouter>
       </AnimatePresence>
     </QueryClientProvider>
