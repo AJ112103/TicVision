@@ -12,19 +12,7 @@ import stomachIcon from "./assets/stomach.svg";
 import wordIcon from "./assets/word.svg";
 import simpleIcon from "./assets/simple.svg";
 import complexIcon from "./assets/complex.svg";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  serverTimestamp,
-  doc,
-  getDoc,
-  increment,
-  setDoc,
-} from "firebase/firestore";
-import { auth } from "./firebase";
-
-const db = getFirestore();
+import { getAuth } from "firebase/auth";
 
 const ticTypes = [
   { id: "1", name: "Arm", icon: armIcon },
@@ -116,49 +104,55 @@ const LogNewTic = () => {
     latitude?: number;
     longitude?: number;
   }) => {
-    const userId = auth.currentUser?.uid;
-
-    if (!userId) {
-      alert("User not authenticated");
+    const auth = getAuth();
+    const user = auth.currentUser;
+  
+    if (!user) {
+      alert("User not authenticated. Please sign in to log a tic.");
       return;
     }
-
+  
     try {
       setLoading(true);
-      const newTic = {
-        ...ticData,
-        createdAt: serverTimestamp(),
-      };
-      await addDoc(collection(db, "users", userId, "ticHistory"), newTic);
-
-      const ticType = ticData.location;
-      const myTicDocRef = doc(db, "users", userId, "mytics", ticType);
-
-      const myTicDoc = await getDoc(myTicDocRef);
-
-      if (myTicDoc.exists()) {
-        await setDoc(myTicDocRef, { count: increment(1) }, { merge: true });
-      } else {
-        await setDoc(myTicDocRef, {
-          name: ticType,
-          count: 1,
-          createdAt: serverTimestamp(),
-        });
+  
+      const idToken = await user.getIdToken(); // Get the user's ID token
+  
+      const response = await fetch(
+        "https://logtic-ejt4pl3dna-uc.a.run.app", // Custom Cloud Run URL
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`, // Include token for authentication
+          },
+          body: JSON.stringify(ticData),
+        }
+      );
+  
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Error logging tic:", error);
+        alert(error.error || "Failed to log tic. Please try again.");
+        return;
       }
-
-      setSuccess(true);
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+  
+      const result = await response.json();
+      if (result.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      }
     } catch (error) {
-      console.error("Error adding tic:", error);
-      alert("Failed to add tic. Please try again.");
+      console.error("Error calling Cloud Run endpoint:", error);
+      alert("Failed to log tic. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubmit = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ticData: any = {
       date: selectedDate,
       timeOfDay,
