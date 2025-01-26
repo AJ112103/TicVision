@@ -237,7 +237,7 @@ const Suggestions: React.FC = () => {
         transition={{ duration: 0.5 }}
         className="flex items-center gap-2 mb-6"
       >
-        <Brain className="w-8 h-8 text-blue-600" />
+        <Brain className="w-8 h-8 text-bg-primary" />
         <h2 className="text-3xl font-bold">Tic Suggestions</h2>
       </motion.div>
 
@@ -312,7 +312,7 @@ const Suggestions: React.FC = () => {
                     onClick={() => toggleLocation(location)}
                     className={`px-3 py-1 rounded-full border transition-colors ${
                       locationFilter.includes(location)
-                        ? 'bg-blue-600 text-white border-blue-600'
+                        ? 'bg-primary text-white '
                         : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
                     }`}
                   >
