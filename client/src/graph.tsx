@@ -425,36 +425,20 @@ const TicLineChart = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="
-                      flex items-center gap-1 px-3 py-2 
-                      rounded-full border border-gray-300
-                      bg-white text-gray-700
-                      hover:bg-gray-100
-                      transition
-                    "
+                    className={`flex items-center gap-1 px-3 py-1 rounded-full border transition
+                      ${
+                        isSelected
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                      }`}
                   >
                     <span>{tic.name}</span>
-                    {isSelected && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
                   </motion.button>
                 );
               })}
             </div>
           </motion.div>
+
 
           {/* CHART */}
           <motion.div
