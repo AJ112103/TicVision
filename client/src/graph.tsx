@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Chart } from "react-google-charts";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { auth } from "./firebase";
+import { motion } from "framer-motion";
 
 interface TicData {
   timeOfDay: string;
@@ -190,7 +191,7 @@ const TicLineChart = () => {
       return item;
     });
 
-    // Sort
+    // Sort by date or timeKey
     return result.sort((a: any, b: any) => {
       if (timeRange === "day") {
         const timeA = new Date(`2000/01/01 ${a.timeKey}`).getTime();
@@ -222,6 +223,12 @@ const TicLineChart = () => {
         return [...prevSelected, ticName];
       }
     });
+  };
+
+  // Reset filters: time range to "all", select all tics
+  const resetFilters = () => {
+    setTimeRange("all");
+    setSelectedTics(myTics.map((tic) => tic.name));
   };
 
   // Loading spinner
@@ -284,161 +291,194 @@ const TicLineChart = () => {
 
   // Chart options
   const chartOptions = {
-    // 1) Remove chart title (redundant)
-    // title: "", // omitted or set to ""
     curveType: "function",
     legend: { position: "bottom" },
-
-    // 2) No slant on the x-axis
     hAxis: {
-      // Remove slantedText: true
       slantedText: false,
-      // If you want to ensure wide labels are fully shown, you can also set:
-      // maxTextLines: 1,
-      // or adjust chartArea to provide more space for the x-axis
     },
     vAxis: {
-      // 3) For "avg" mode, 0 to 10. Otherwise, 0 to (max + 5)
       viewWindow: {
         min: 0,
         max: chartMax,
       },
     },
-    // Colors
     colors: myTics
       .filter((tic) => selectedTics.includes(tic.name))
       .map((tic) => tic.color),
-    // Optionally: adjust chartArea if you need more space:
-    // chartArea: {
-    //   left: 50,
-    //   right: 20,
-    //   top: 10,
-    //   bottom: 50,
-    // },
   };
 
   return (
-    <div className="w-full px-2 sm:px-4 py-4 sm:py-6">
-      <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6">
-
-        {/* ROW 1: Mode Switcher (arrows + label) centered */}
-        <div className="flex justify-center items-center gap-2 mb-4">
-          {/* Left Arrow */}
-          <button
-            onClick={prevMode}
-            className="p-2 hover:bg-gray-100 rounded"
+    <motion.div
+      // Fade in the entire page
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="flex flex-col min-h-screen"
+    >
+      <motion.div
+        className="flex-grow w-full px-2 sm:px-4 py-4 sm:py-6"
+        // Slide up the main container
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <motion.div
+          className="bg-white shadow-sm rounded-lg p-3 sm:p-6"
+          // Slight delay for the card fade/slide
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          {/* ROW 1: Mode Switcher (arrows + label) centered */}
+          <motion.div
+            className="flex justify-center items-center gap-2 mb-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            {/* Left Arrow */}
+            <button
+              onClick={prevMode}
+              className="p-2 hover:bg-gray-100 rounded"
             >
-              <path d="M15 19l-7-7 7-7" strokeWidth={2} />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M15 19l-7-7 7-7" strokeWidth={2} />
+              </svg>
+            </button>
 
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-            {renderModeLabel(currentChartMode)}
-          </h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              {renderModeLabel(currentChartMode)}
+            </h2>
 
-          {/* Right Arrow */}
-          <button
-            onClick={nextMode}
-            className="p-2 hover:bg-gray-100 rounded"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            {/* Right Arrow */}
+            <button
+              onClick={nextMode}
+              className="p-2 hover:bg-gray-100 rounded"
             >
-              <path d="M9 5l7 7-7 7" strokeWidth={2} />
-            </svg>
-          </button>
-        </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M9 5l7 7-7 7" strokeWidth={2} />
+              </svg>
+            </button>
+          </motion.div>
 
-        {/* ROW 2: Time Range Dropdown - we can keep it right-aligned or center it */}
-        <div className="flex justify-center mb-4">
-          <select
-            onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
-            value={timeRange}
-            className="w-full sm:w-auto input bg-white border-gray-200 hover:border-primary focus:border-primary p-2 rounded text-sm"
+          {/* ROW 2: Time Range + Reset Filters */}
+          <motion.div
+            className="flex justify-center items-center gap-3 mb-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
           >
-            {Object.entries(timeRanges).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
+            <select
+              onChange={(e) => setTimeRange(e.target.value as TimeRangeKey)}
+              value={timeRange}
+              className="w-full sm:w-auto input bg-white border-gray-200 hover:border-primary focus:border-primary p-2 rounded text-sm"
+            >
+              {Object.entries(timeRanges).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
 
-        {/* TIC FILTER */}
-        <div className="mb-4">
-          <label
-            htmlFor="tic-select"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            {/* Reset Filters Button */}
+            <button
+              onClick={resetFilters}
+              className="p-2 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+            >
+              Reset Filters
+            </button>
+          </motion.div>
+
+          {/* TIC FILTER */}
+          <motion.div
+            className="mb-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
           >
-            Select Tic Types:
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {myTics.map((tic) => {
-              const isSelected = selectedTics.includes(tic.name);
-              return (
-                <button
-                  key={tic.name}
-                  type="button"
-                  onClick={() => toggleTic(tic.name)}
-                  className="
-                    flex items-center gap-1 px-3 py-2 
-                    rounded-full border border-gray-300
-                    bg-white text-gray-700
-                    hover:bg-gray-100
-                    transition
-                  "
-                >
-                  <span>{tic.name}</span>
-                  {isSelected && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={3}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            <label
+              htmlFor="tic-select"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Select Tic Types:
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {myTics.map((tic, index) => {
+                const isSelected = selectedTics.includes(tic.name);
+                return (
+                  <motion.button
+                    key={tic.name}
+                    type="button"
+                    onClick={() => toggleTic(tic.name)}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="
+                      flex items-center gap-1 px-3 py-2 
+                      rounded-full border border-gray-300
+                      bg-white text-gray-700
+                      hover:bg-gray-100
+                      transition
+                    "
+                  >
+                    <span>{tic.name}</span>
+                    {isSelected && (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
 
-        {/* CHART */}
-        <div className="h-[300px] sm:h-[400px] w-full">
-          <Chart
-            width="100%"
-            height="100%"
-            chartType="LineChart"
-            loader={
-              <div className="flex justify-center items-center h-full">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
-              </div>
-            }
-            data={filteredChartData}
-            options={chartOptions}
-          />
-        </div>
-      </div>
-    </div>
+          {/* CHART */}
+          <motion.div
+            className="w-full h-[400px] sm:h-[600px]"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <Chart
+              width="100%"
+              height="100%"
+              chartType="LineChart"
+              loader={
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
+                </div>
+              }
+              data={filteredChartData}
+              options={chartOptions}
+            />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

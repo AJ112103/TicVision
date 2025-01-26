@@ -3,6 +3,7 @@ import { useSwipeable } from "react-swipeable";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { auth } from "./firebase";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Icons
 import armIcon from "./assets/arm-icon.svg";
@@ -37,16 +38,20 @@ const filterSections = ["My Tics", "Vocal", "Motor", "All"];
 
 const LogTicModal = () => {
   const [currentSection, setCurrentSection] = useState(0);
-  const [filteredTics, setFilteredTics] = useState([]);
-  const [myTics, setMyTics] = useState([]);
+  const [filteredTics, setFilteredTics] = useState<any[]>([]);
+  const [myTics, setMyTics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const db = getFirestore();
 
-  const handleTileClick = (ticName) => {
-    navigate(`/logtic/${ticName.replace(/\s+/g, "-").toLowerCase()}`);
-  };
+  // For swiping between filter sections
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () =>
+      setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1)),
+    onSwipedRight: () => setCurrentSection((prev) => Math.max(prev - 1, 0)),
+  });
 
+  // Fetch myTics from Firestore
   const fetchMyTics = async () => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
@@ -58,8 +63,11 @@ const LogTicModal = () => {
         id: doc.id,
         name: doc.data().name,
         count: doc.data().count,
-        ...ticTypes.find((tic) => tic.name.toLowerCase() === doc.data().name.toLowerCase()),
+        ...ticTypes.find(
+          (tic) => tic.name.toLowerCase() === doc.data().name.toLowerCase()
+        ),
       }));
+      // Filter out any with undefined attributes
       setMyTics(tics.filter(Boolean));
     } catch (error) {
       console.error("Error fetching tics:", error);
@@ -72,8 +80,10 @@ const LogTicModal = () => {
     fetchMyTics();
   }, []);
 
+  // Handle filter sections
   useEffect(() => {
-    switch (filterSections[currentSection]) {
+    const currentFilter = filterSections[currentSection];
+    switch (currentFilter) {
       case "My Tics":
         setFilteredTics(myTics);
         break;
@@ -91,29 +101,60 @@ const LogTicModal = () => {
     }
   }, [currentSection, myTics]);
 
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1)),
-    onSwipedRight: () => setCurrentSection((prev) => Math.max(prev - 1, 0)),
-  });
+  // Navigate to log page
+  const handleTileClick = (ticName: string) => {
+    navigate(`/logtic/${ticName.replace(/\s+/g, "-").toLowerCase()}`);
+  };
+
+  // Framer Motion variants
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.4 },
+    },
+  };
+
+  const tileVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3,
+        delay: i * 0.04, // small stagger
+      },
+    }),
+  };
 
   return (
-    <div
+    <motion.div
       className="bg-[#C1E4EC] border border-gray-700 rounded-lg p-4 shadow-lg"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
       {...swipeHandlers}
     >
       {/* Section Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentSection((prev) => Math.max(prev - 1, 0))}
-          className="text-[#256472] px-2"
+          className="text-[#256472] px-2 disabled:text-gray-300"
           disabled={currentSection === 0}
         >
           {"<"}
         </button>
-        <h4 className="text-lg font-bold text-[#256472]">{filterSections[currentSection]}</h4>
+        <h4 className="text-lg font-bold text-[#256472]">
+          {filterSections[currentSection]}
+        </h4>
         <button
-          onClick={() => setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1))}
-          className="text-black px-2"
+          onClick={() =>
+            setCurrentSection((prev) =>
+              Math.min(prev + 1, filterSections.length - 1)
+            )
+          }
+          className="text-black px-2 disabled:text-gray-300"
           disabled={currentSection === filterSections.length - 1}
         >
           {">"}
@@ -122,24 +163,31 @@ const LogTicModal = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center h-32 sm:h-64">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gray-500"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto">
-          {filteredTics.map((tic) => (
-            <button
-              key={tic.id}
-              onClick={() => handleTileClick(tic.name)}
-              className="flex flex-col items-center justify-center p-4 bg-[#256472] text-[#C1E4EC] rounded-lg hover:bg-[#3c7a8b] w-[120px] border border-gray-700 "
-            >
-              <img src={tic.icon} alt={tic.name} className="w-12 h-12 mb-2" />
-              <span className="text-sm font-medium">{tic.name}</span>
-            </button>
-          ))}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+          <AnimatePresence>
+            {filteredTics.map((tic, index) => (
+              <motion.button
+                key={tic.id}
+                variants={tileVariants}
+                initial="hidden"
+                animate="visible"
+                custom={index}
+                exit={{ opacity: 0 }}
+                onClick={() => handleTileClick(tic.name)}
+                className="flex flex-col items-center justify-center p-4 bg-[#256472] text-[#C1E4EC] rounded-lg hover:bg-[#3c7a8b] border border-gray-700"
+              >
+                <img src={tic.icon} alt={tic.name} className="w-12 h-12 mb-2" />
+                <span className="text-sm font-medium">{tic.name}</span>
+              </motion.button>
+            ))}
+          </AnimatePresence>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
