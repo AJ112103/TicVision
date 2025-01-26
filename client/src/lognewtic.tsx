@@ -185,9 +185,9 @@ const LogNewTic = () => {
   }, []);
 
   return (
-  <div className="flex flex-col items-center justify-center h-screen bg-[#C1E4EC]">
+  <div className="flex flex-col items-center justify-center h-screen bg-[#c6e8f0]">
     {/* Modal Container */}
-    <div className="max-w-md w-full bg-[#C1E4EC] rounded-lg p-6">
+    <div className="max-w-md w-full bg-[#c6e8f0] rounded-lg p-6">
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <p className="text-lg font-semibold">Loading...</p>
