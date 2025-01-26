@@ -101,7 +101,7 @@ const TodayTicsBarChart = () => {
     // If there's only a header or no data
     return (
       <div className="w-full px-2 sm:px-4 py-4 sm:py-6">
-        <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6">
+        <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6 ">
           <div className="flex justify-center items-center h-[300px] sm:h-[400px]">
             <p className="text-gray-500 text-center">No tics logged today.</p>
           </div>
@@ -123,7 +123,7 @@ const TodayTicsBarChart = () => {
 
   return (
     <div className="w-full px-2 sm:px-4 py-4 sm:py-6">
-      <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6">
+      <div className="bg-white shadow-sm rounded-lg p-3 sm:p-6 border border-gray-700">
         <div className="h-[300px] sm:h-[400px] w-full">
           <Chart
             width="100%"
