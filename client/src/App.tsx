@@ -22,16 +22,6 @@ import Footer from "./footer";
 
 const queryClient = new QueryClient();
 
-// Layout for authenticated pages
-const AuthenticatedLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <>
-      <Navbar />
-      <div className="p-4">{children}</div>
-    </>
-  );
-};
-
 const App = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -57,90 +47,58 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AnimatePresence mode="wait">
         <BrowserRouter>
+          {/* Conditionally render Navbar and pass isLoggedIn */}
+          {window.location.pathname !== "/login" && (
+            <Navbar isLoggedIn={isAuthenticated} />
+          )}
+
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route
               path="/login"
-              element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
+              element={
+                isAuthenticated ? <Navigate to="/dashboard" /> : <Login />
+              }
             />
             <Route path="/register" element={<Login />} />
-            <Route
-              path="/learn-more"
-              element={<LearnMore />}
-            />
+            <Route path="/learn-more" element={<LearnMore />} />
 
             {/* Authenticated routes */}
             <Route
               path="/dashboard"
               element={
-                isAuthenticated ? (
-                  <AuthenticatedLayout>
-                    <Dashboard />
-                  </AuthenticatedLayout>
-                ) : (
-                  <Navigate to="/login" />
-                )
+                isAuthenticated ? <Dashboard /> : <Navigate to="/login" />
               }
             />
             <Route
               path="/logtic/:ticType"
               element={
-                isAuthenticated ? (
-                  <AuthenticatedLayout>
-                    <LogNewTic />
-                  </AuthenticatedLayout>
-                ) : (
-                  <Navigate to="/login" />
-                )
+                isAuthenticated ? <LogNewTic /> : <Navigate to="/login" />
               }
             />
             <Route
               path="/profile"
               element={
-                isAuthenticated ? (
-                  <AuthenticatedLayout>
-                    <Profile />
-                  </AuthenticatedLayout>
-                ) : (
-                  <Navigate to="/login" />
-                )
+                isAuthenticated ? <Profile /> : <Navigate to="/login" />
               }
             />
             <Route
               path="/graph"
               element={
-                isAuthenticated ? (
-                  <AuthenticatedLayout>
-                    <TicBarChart />
-                  </AuthenticatedLayout>
-                ) : (
-                  <Navigate to="/login" />
-                )
+                isAuthenticated ? <TicBarChart /> : <Navigate to="/login" />
               }
             />
             <Route
               path="/table"
               element={
-                isAuthenticated ? (
-                  <AuthenticatedLayout>
-                    <TicTable />
-                  </AuthenticatedLayout>
-                ) : (
-                  <Navigate to="/login" />
-                )
+                isAuthenticated ? <TicTable /> : <Navigate to="/login" />
               }
             />
             <Route
               path="/suggestions"
               element={
-                isAuthenticated ? (
-                  <AuthenticatedLayout>
-                    <Suggestions />
-                  </AuthenticatedLayout>
-                ) : (
-                  <Navigate to="/login" />
-                )
+                isAuthenticated ? <Suggestions /> : <Navigate to="/login" />
               }
             />
 
@@ -148,8 +106,8 @@ const App = () => {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
 
-          {/* Footer shown on all pages */}
-          <Footer />
+          {/* Conditionally render Footer */}
+          {window.location.pathname !== "/login" && <Footer />}
         </BrowserRouter>
       </AnimatePresence>
     </QueryClientProvider>
