@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "./firebase";
 import LogTicModal from "./logticmodal";
 import TodayTicsBarChart from "./graphmodal";
@@ -31,20 +31,25 @@ const Dashboard = () => {
       }
     };
 
-    // Fetch the latest advice
+    // Fetch advice based on ticCounter
     const fetchAdvice = async () => {
-      if (!userId) return;
+      if (!userId || ticCounter === 0) return;
 
       try {
+        // Determine the base counter (e.g., 10, 20, 30, etc.)
+        const baseCounter = Math.floor(ticCounter / 10) * 10;
+
+        // Query the advice document where ticCounter matches baseCounter
         const adviceRef = collection(db, "users", userId, "advice");
-        const adviceQuery = query(adviceRef, orderBy("createdAt", "desc"), limit(1));
+        const adviceQuery = query(adviceRef, where("ticCounter", "==", baseCounter), limit(1));
         const adviceSnapshot = await getDocs(adviceQuery);
 
         if (!adviceSnapshot.empty) {
           const latestAdvice = adviceSnapshot.docs[0].data();
-          console.log(latestAdvice);
-          setAdvice(latestAdvice.advice || "No advice available.");
-          setAdvice("Log more tics to access AI features");
+          const adviceIndex = ticCounter % 10; // Determine the advice index based on the remainder
+          setAdvice(
+            (latestAdvice.advice[adviceIndex]?.slice(3) || "No advice available.")
+          );          
         } else {
           setAdvice("No advice available.");
         }
@@ -55,7 +60,7 @@ const Dashboard = () => {
 
     fetchUserData();
     fetchAdvice();
-  }, [userId]);
+  }, [userId, ticCounter]);
 
   const todayDate = new Date().toLocaleDateString("en-GB", {
     weekday: "long",
