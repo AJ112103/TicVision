@@ -7,7 +7,7 @@ import { MenuIcon } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard" },
-  { label: "Table", path: "/table" },
+  { label: "History", path: "/history" },
   { label: "Suggestions", path: "/suggestions" },
   { label: "Information", path: "/ticinfo" },
 ];
@@ -42,7 +42,7 @@ const Navbar = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
           isLoggedIn ? "bg-[#4a90a1]" : "bg-[#C6E8F0]"
         }`}
       >
-        <div className="container mx-auto flex items-center justify-between px-4 py-2 w-full">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4 w-full">
           {/* Left Side: Logo & Brand */}
           <div className="flex items-center space-x-2">
             <img src={logo} alt="Logo" className="h-10 w-auto" />
