@@ -11,7 +11,6 @@ import Login from "./login";
 import Dashboard from "./dashboard";
 import Profile from "./profile";
 import LogNewTic from "./lognewtic";
-import TicBarChart from "./graph";
 import Navbar from "./navbar";
 import TicTable from "./ticTable";
 import LearnMore from "./learnmore";
@@ -89,13 +88,7 @@ const App = () => {
               }
             />
             <Route
-              path="/graph"
-              element={
-                isAuthenticated ? <TicBarChart /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/table"
+              path="/history"
               element={
                 isAuthenticated ? <TicTable /> : <Navigate to="/login" />
               }
