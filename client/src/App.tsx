@@ -16,8 +16,7 @@ import Navbar from "./navbar";
 import TicTable from "./ticTable";
 import LearnMore from "./learnmore";
 import Suggestions from "./suggestions";
-
-// Import the Footer component
+import TicInfo from "./ticinfo";
 import Footer from "./footer";
 
 const queryClient = new QueryClient();
@@ -43,14 +42,20 @@ const App = () => {
     );
   }
 
+  // If you ONLY want to hide the Navbar on the login page:
+  // const hideNavbar = window.location.pathname === "/login";
+
+  // If you ALSO want to hide the Navbar on the register page:
+  const hideNavbar = ["/login", "/register"].includes(
+    window.location.pathname.toLowerCase()
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
       <AnimatePresence mode="wait">
         <BrowserRouter>
           {/* Conditionally render Navbar and pass isLoggedIn */}
-          {window.location.pathname !== "/login" && (
-            <Navbar isLoggedIn={isAuthenticated} />
-          )}
+          {!hideNavbar && <Navbar isLoggedIn={isAuthenticated} />}
 
           <Routes>
             {/* Public routes */}
@@ -101,13 +106,19 @@ const App = () => {
                 isAuthenticated ? <Suggestions /> : <Navigate to="/login" />
               }
             />
+            <Route
+              path="/ticinfo"
+              element={
+                isAuthenticated ? <TicInfo /> : <Navigate to="/login" />
+              }
+            />
 
             {/* Catch-all route */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
 
           {/* Conditionally render Footer */}
-          {window.location.pathname !== "/login" && <Footer />}
+          {!hideNavbar && <Footer />}
         </BrowserRouter>
       </AnimatePresence>
     </QueryClientProvider>
