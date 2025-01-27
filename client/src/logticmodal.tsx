@@ -1,34 +1,26 @@
 import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-} from "firebase/firestore";
-import { auth } from "./firebase"; // Your Firebase auth import
-import armIcon from "./assets/arm.svg";
-import eyeIcon from "./assets/eye.svg";
-import jawIcon from "./assets/jaw.svg";
-import legIcon from "./assets/leg.svg";
-import mouthIcon from "./assets/mouth.svg";
-import neckIcon from "./assets/neck.svg";
-import shoulderIcon from "./assets/shoulder.svg";
-import stomachIcon from "./assets/stomach.svg";
-import wordIcon from "./assets/word.svg";
-import simpleIcon from "./assets/simple.svg";
-import complexIcon from "./assets/complex.svg";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { auth } from "./firebase";
 import { useNavigate } from "react-router-dom";
 
-interface TicType {
-  id: string;
-  name: string;
-  tag: "vocal" | "motor";
-  icon: string; // Path to SVG icon
-}
+// Icons
+import armIcon from "./assets/arm-icon.svg";
+import backIcon from "./assets/back-icon.svg";
+import breathingIcon from "./assets/breathing-icon.svg";
+import eyeIcon from "./assets/eye-icon.svg";
+import jawIcon from "./assets/jaw-icon.svg";
+import legIcon from "./assets/leg-icon.svg";
+import mouthIcon from "./assets/mouth-icon.svg";
+import neckIcon from "./assets/neck-icon.svg";
+import phraseIcon from "./assets/phrase-icon.svg";
+import shoulderIcon from "./assets/shoulder-icon.svg";
+import stomachIcon from "./assets/stomach-icon.svg";
+import simpleIcon from "./assets/simple-icon.svg";
 
-const ticTypes: TicType[] = [
+const ticTypes = [
   { id: "1", name: "Arm", tag: "motor", icon: armIcon },
-  { id: "2", name: "Complex Vocal", tag: "vocal", icon: complexIcon },
+  { id: "2", name: "Back", tag: "motor", icon: backIcon },
   { id: "3", name: "Eye", tag: "motor", icon: eyeIcon },
   { id: "4", name: "Jaw", tag: "motor", icon: jawIcon },
   { id: "5", name: "Leg", tag: "motor", icon: legIcon },
@@ -37,70 +29,51 @@ const ticTypes: TicType[] = [
   { id: "8", name: "Shoulder", tag: "motor", icon: shoulderIcon },
   { id: "9", name: "Simple Vocal", tag: "vocal", icon: simpleIcon },
   { id: "10", name: "Stomach", tag: "motor", icon: stomachIcon },
-  { id: "11", name: "Word Phrase", tag: "vocal", icon: wordIcon },
+  { id: "11", name: "Word Phrase", tag: "vocal", icon: phraseIcon },
+  { id: "12", name: "Breathing", tag: "motor", icon: breathingIcon },
 ];
 
 const filterSections = ["My Tics", "Vocal", "Motor", "All"];
 
-// Placeholder Loading Component
-const Loading = () => (
-<div className="flex justify-center items-center h-64">
-    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gray-500"></div>
-</div>
-);
-  
-
 const LogTicModal = () => {
   const [currentSection, setCurrentSection] = useState(0);
-  const [filteredTics, setFilteredTics] = useState<TicType[]>([]);
-  const [myTics, setMyTics] = useState<TicType[]>([]);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [filteredTics, setFilteredTics] = useState([]);
+  const [myTics, setMyTics] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const db = getFirestore();
 
-  const handleTileClick = (ticName: string) => {
+  const handleTileClick = (ticName) => {
     navigate(`/logtic/${ticName.replace(/\s+/g, "-").toLowerCase()}`);
   };
 
   const fetchMyTics = async () => {
     const userId = auth.currentUser?.uid;
-    if (!userId) {
-      console.error("User not authenticated");
-      return;
-    }
+    if (!userId) return;
 
     setLoading(true);
     try {
-      const myTicsCollection = collection(db, "users", userId, "mytics");
-      const snapshot = await getDocs(myTicsCollection);
-
-      const tics = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          name: doc.data().name,
-          count: doc.data().count,
-        }))
-        .map((myTic) => {
-          const matchingTic = ticTypes.find(
-            (tic) => tic.name.toLowerCase() === myTic.name.toLowerCase()
-          );
-          return {
-            ...matchingTic,
-            ...myTic,
-          };
-        })
-        .filter((tic) => tic);
-
-      setMyTics(tics);
+      const snapshot = await getDocs(collection(db, "users", userId, "mytics"));
+      const tics = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+        count: doc.data().count,
+        ...ticTypes.find((tic) => tic.name.toLowerCase() === doc.data().name.toLowerCase()),
+      }));
+      setMyTics(tics.filter(Boolean));
     } catch (error) {
-      console.error("Error fetching My Tics:", error);
+      console.error("Error fetching tics:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateFilteredTics = (sectionIndex: number) => {
-    switch (filterSections[sectionIndex]) {
+  useEffect(() => {
+    fetchMyTics();
+  }, []);
+
+  useEffect(() => {
+    switch (filterSections[currentSection]) {
       case "My Tics":
         setFilteredTics(myTics);
         break;
@@ -116,82 +89,54 @@ const LogTicModal = () => {
       default:
         break;
     }
-  };
-
-  useEffect(() => {
-    fetchMyTics(); // Fetch myTics on component mount
-  }, []);
-
-  useEffect(() => {
-    updateFilteredTics(currentSection);
   }, [currentSection, myTics]);
 
-  const handleNavigation = (direction: "LEFT" | "RIGHT") => {
-    if (direction === "LEFT" && currentSection < filterSections.length - 1) {
-      setCurrentSection(currentSection + 1);
-    } else if (direction === "RIGHT" && currentSection > 0) {
-      setCurrentSection(currentSection - 1);
-    }
-  };
-
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => handleNavigation("LEFT"),
-    onSwipedRight: () => handleNavigation("RIGHT"),
+    onSwipedLeft: () => setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1)),
+    onSwipedRight: () => setCurrentSection((prev) => Math.max(prev - 1, 0)),
   });
 
   return (
-    <div className="card lg:col-span-1" {...swipeHandlers}>
+    <div
+      className="bg-[#C1E4EC] border border-gray-700 rounded-lg p-4 shadow-lg"
+      {...swipeHandlers}
+    >
       {/* Section Navigation */}
-      <div className="flex items-center justify-center mb-2">
+      <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => handleNavigation("RIGHT")}
-          className="text-gray-500 hover:text-gray-700 px-2"
+          onClick={() => setCurrentSection((prev) => Math.max(prev - 1, 0))}
+          className="text-[#256472] px-2"
           disabled={currentSection === 0}
         >
           {"<"}
         </button>
-        <h4 className="text-lg sm:text-m text-center w-40">{filterSections[currentSection]}</h4>
+        <h4 className="text-lg font-bold text-[#256472]">{filterSections[currentSection]}</h4>
         <button
-          onClick={() => handleNavigation("LEFT")}
-          className="text-gray-500 hover:text-gray-700 px-2"
+          onClick={() => setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1))}
+          className="text-[#256472] px-2"
           disabled={currentSection === filterSections.length - 1}
         >
           {">"}
         </button>
       </div>
+
       {/* Content */}
       {loading ? (
-        <Loading />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gray-500"></div>
+        </div>
       ) : (
-        <div className="overflow-y-scroll h-64 border rounded-lg p-4">
-          <div className="grid grid-cols-2 gap-4">
-            {filteredTics.length > 0 ? (
-              filteredTics.map((tic) => (
-                <button
-                  key={tic.id}
-                  onClick={() => handleTileClick(tic.name)}
-                  className="flex flex-col items-center justify-center p-4 bg-[#4a90a1] text-white rounded-lg hover:bg-[#3c7a8b] w-full"
-                >
-                  <img
-                    src={tic.icon}
-                    alt={tic.name}
-                    className="-mb-3 w-20 h-15"
-                  />
-                  <span
-                    className="text-sm font-medium break-words leading-tight text-center"
-                    style={{
-                      whiteSpace: "normal",
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {tic.name}
-                  </span>
-                </button>
-              ))
-            ) : (
-              <p className="text-sm text-text-secondary">No tics available.</p>
-            )}
-          </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 overflow-y-auto">
+          {filteredTics.map((tic) => (
+            <button
+              key={tic.id}
+              onClick={() => handleTileClick(tic.name)}
+              className="flex flex-col items-center justify-center p-4 bg-[#256472] text-[#C1E4EC] rounded-lg hover:bg-[#3c7a8b] w-[120px] border border-gray-700 "
+            >
+              <img src={tic.icon} alt={tic.name} className="w-12 h-12 mb-2" />
+              <span className="text-sm font-medium">{tic.name}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>

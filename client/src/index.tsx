@@ -1,126 +1,131 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
-import { getAuth } from 'firebase/auth';
-import { ArrowRight, Activity, Brain, Heart } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import brainIcon from "./assets/brain-icon.svg";
+import lightbulbIcon from "./assets/lightbulb-icon.svg";
+import graphIcon from "./assets/graph-icon.svg";
+import educationIcon from "./assets/education-icon.svg";
+import { Target } from "lucide-react";
+import { ReactNode } from "react";
 
-const features = [
-  {
-    icon: Activity,
-    title: "Track Your Tics",
-    description: "Log and monitor your tics with our intuitive tracking system",
-  },
-  {
-    icon: Brain,
-    title: "Understand Patterns",
-    description: "Visualize your data through beautiful, insightful charts",
-  },
-  {
-    icon: Heart,
-    title: "Improve Well-being",
-    description: "Get personalized recommendations for better management",
-  },
-];
+interface MotionCardProps {
+  children: ReactNode;
+  delay: number;
+}
 
-const Index: React.FC = () => {
-  const navigate = useNavigate();
-  const auth = getAuth();
-  const isAuthenticated = auth.currentUser != null;
+const MotionCard = ({ children, delay }: MotionCardProps) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay }}
+    whileHover={{ scale: 1.05 }}
+    className="bg-white text-[#4a90a1] p-4 rounded-lg shadow-lg flex flex-col items-center"
+  >
+    {children}
+  </motion.div>
+);
 
-  const handleStartJourney = () => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    } else {
-      navigate("/login");
-    }
-  };
+const Index = () => {
+  const journeyFeatures = [
+    { icon: <Target className="h-6 w-6 text-white" />, text: "Track your progress over time." },
+    { icon: <Target className="h-6 w-6 text-white" />, text: "Gain insights into your tics and triggers." },
+    { icon: <Target className="h-10 w-10 text-white" />, text: "Enjoy a supportive community and personalized recommendations." }
+  ];
 
   return (
-    <div className="min-h-screen">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md">
-        <nav className="container mx-auto flex h-16 sm:h-20 items-center justify-between px-4 sm:px-6">
-          <Link to="/" className="text-xl sm:text-2xl font-bold text-primary">
-            TicVision
-          </Link>
-          <div className="flex items-center gap-3 sm:gap-6">
-            {!isAuthenticated && (
-              <>
-                <Link to="/login" className="btn-secondary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
-                  Sign In
-                </Link>
-                <Link to="/register" className="btn-secondary text-sm sm:text-base px-3 sm:px-6 py-2 sm:py-3">
-                  Get Started
-                </Link>
-              </>
-            )}
-          </div>
-        </nav>
-      </header>
+    <div className="bg-[#4a90a1] text-white min-h-screen flex flex-col items-center py-8 px-4 md:px-8">
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-[#4a90a1] text-white text-center px-6 py-4 rounded-lg max-w-md mb-8"
+      >
+        <div className="bg-[#5ba8b9] rounded-3xl p-6 md:p-8 shadow-lg">
+          <p className="text-m md:text-base">
+            <strong>TicVision</strong> empowers individuals with <strong>Tourette's Syndrome</strong> and their caregivers by combining <strong>advanced tools</strong> and <strong>insights</strong> to make tic management <strong>easier than ever</strong>.
+          </p>
+        </div>
+      </motion.div>
 
-      <main className="container mx-auto px-4 sm:px-6 pt-24 sm:pt-32">
-        <section className="py-12 sm:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto max-w-3xl text-center"
-          >
-            <span className="mb-4 inline-block rounded-full bg-primary/10 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium text-primary">
-              Understand Your Tics, Visualize Your Progress
-            </span>
-            <h1 className="mb-4 sm:mb-6 text-3xl sm:text-5xl font-bold leading-tight lg:text-6xl">
-              Take Control of Your
-              <span className="text-primary"> Journey</span>
-            </h1>
-            <p className="mb-6 sm:mb-8 text-base sm:text-lg text-text-secondary lg:text-xl">
-              TicVision helps you track, understand, and manage your tics with powerful visualization tools and personalized insights.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 sm:justify-center">
-            <button
-              onClick={handleStartJourney}
-              className="group w-full sm:w-auto text-sm sm:text-base flex items-center justify-center gap-2 px-4 py-2"
-              style={{
-                backgroundColor: '#4a90a1',
-                color: '#fff',
-                padding: '0.75rem 1.5rem',
-                borderRadius: '0.5rem',
-                fontWeight: '500',
-              }}
+      {/* Features Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
+        <MotionCard delay={0.4}>
+          <img src={brainIcon} alt="Comprehensive Tic Tracking" className="h-16 w-16 mb-4" />
+          <p className="text-sm md:text-base font-bold">Comprehensive Tic Tracking</p>
+        </MotionCard>
+        
+        <MotionCard delay={0.6}>
+          <img src={lightbulbIcon} alt="Personalized Suggestions" className="h-16 w-16 mb-4" />
+          <p className="text-sm md:text-base font-bold">Personalized Suggestions</p>
+        </MotionCard>
+        
+        <MotionCard delay={0.8}>
+          <img src={graphIcon} alt="Tic Data Visualization" className="h-16 w-16 mb-4" />
+          <p className="text-sm md:text-base font-bold">Tic Data Visualization</p>
+        </MotionCard>
+        
+        <MotionCard delay={1.0}>
+          <img src={educationIcon} alt="Tic Education" className="h-16 w-16 mb-4" />
+          <p className="text-sm md:text-base font-bold">Tic Education</p>
+        </MotionCard>
+      </div>
+
+      {/* Footer Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.4 }}
+        className="mt-8 bg-white text-[#4a90a1] px-6 py-3 rounded-lg shadow-md"
+      >
+        <p className="text-lg font-bold">More Coming Soon!</p>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.2 }}
+        className="text-center max-w-2xl"
+      >
+        <h2 className="text-xl mt-8 md:text-2xl font-bold">
+          Start Your Journey with TicVision Today
+        </h2>
+      </motion.div>
+
+      {/* Journey Features */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="w-full max-w-2xl my-12"
+      >
+        <div className="bg-[#5ba8b9] rounded-3xl p-6 md:p-8 shadow-lg">
+          {journeyFeatures.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 * index }}
+              className="flex items-center bg-[#4a90a1] text-white rounded-2xl p-4 mb-4 last:mb-0"
             >
-              Start Your Journey
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
-              <Link
-                to="/learn-more"
-                className="btn-secondary w-full sm:w-auto text-sm sm:text-base"
-              >
-                Learn More
-              </Link>
-            </div>
-          </motion.div>
-        </section>
+              {feature.icon}
+              <p className="ml-4 text-sm md:text-base">{feature.text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
 
-        <section className="py-12 sm:py-20">
-          <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="card group hover:shadow-md"
-              >
-                <div className="mb-4 inline-flex rounded-lg bg-primary/10 p-3 text-primary">
-                  <feature.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                </div>
-                <h3 className="mb-2 text-lg sm:text-xl font-semibold">{feature.title}</h3>
-                <p className="text-sm sm:text-base text-text-secondary">{feature.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      </main>
-      
+      {/* Vision Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.2 }}
+        className="text-center max-w-2xl"
+      >
+        <h2 className="text-xl md:text-2xl font-bold mb-4">
+          Understand Your Tics, Visualise Your Progress.
+        </h2>
+      </motion.div>
+
     </div>
   );
 };
