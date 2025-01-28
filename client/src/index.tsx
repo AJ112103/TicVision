@@ -12,11 +12,11 @@ interface MotionCardProps {
   delay: number;
 }
 
-const MotionCard = ({ children, delay }: MotionCardProps) => (
+const MotionCard = ({ children}: MotionCardProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay }}
+    transition={{ duration: 0.5 }}
     whileHover={{ scale: 1.05 }}
     className="bg-white text-[#4a90a1] p-4 rounded-lg shadow-lg flex flex-col items-center"
   >
@@ -28,7 +28,7 @@ const Index = () => {
   const journeyFeatures = [
     { icon: <Target className="h-6 w-6 text-white" />, text: "Track your progress over time." },
     { icon: <Target className="h-6 w-6 text-white" />, text: "Gain insights into your tics and triggers." },
-    { icon: <Target className="h-10 w-10 text-white" />, text: "Enjoy a supportive community and personalized recommendations." }
+    { icon: <Target className="h-6 w-6 text-white" />, text: "Enjoy a supportive community and personalized recommendations." }
   ];
 
   return (

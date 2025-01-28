@@ -9,7 +9,7 @@ const navItems = [
   { label: "Dashboard", path: "/dashboard" },
   { label: "History", path: "/history" },
   { label: "Suggestions", path: "/suggestions" },
-  { label: "Information", path: "/ticinfo" },
+  { label: "Education", path: "/ticinfo" },
 ];
 
 const Navbar = ({ isLoggedIn }: { isLoggedIn: boolean }) => {

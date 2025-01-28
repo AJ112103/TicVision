@@ -11,17 +11,17 @@ function Footer() {
 
           <div className="flex gap-4 justify-center sm:justify-end sm:gap-6">
             <a
+              href="https://vgiezs4h7sp.typeform.com/to/PBeAe1Yq"
+              className="text-xs sm:text-sm text-text-secondary hover:text-primary"
+            >
+              <strong>Feedback Form</strong>
+            </a>
+            <span className="text-text-secondary">|</span>
+            <a
               href="https://www.termsfeed.com/live/7b535df7-4adb-424e-9592-321ef0e23384"
               className="text-xs sm:text-sm text-text-secondary hover:text-primary"
             >
               Privacy Policy
-            </a>
-            <span className="text-text-secondary">|</span>
-            <a
-              href="https://vgiezs4h7sp.typeform.com/to/PBeAe1Yq"
-              className="text-xs sm:text-sm text-text-secondary hover:text-primary"
-            >
-              Feedback Form
             </a>
           </div>
         </div>
