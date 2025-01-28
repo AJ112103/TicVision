@@ -5,12 +5,15 @@
 
 /* Table Body Cell Styling */
 .tic-table td {
-  @apply text-sm text-text-primary; /* 'text-text-primary' would be a Tailwind custom color if you have it defined */
+  @apply text-sm text-text-primary; /* Adjust this to your preferred color utility (e.g., text-gray-700) */
 }
 
-/* Enable horizontal scrolling on smaller devices */
+/* 
+  Enable horizontal scrolling on smaller devices
+  and keep the table width full.
+*/
 .tic-table {
-  @apply w-full;
+  @apply w-full overflow-x-auto;
 }
 
 /* 
@@ -24,7 +27,9 @@
     @apply hidden; 
   }
 
-  .tic-table tbody, .tic-table tr, .tic-table td {
+  .tic-table tbody,
+  .tic-table tr,
+  .tic-table td {
     @apply block w-full;
   }
 
@@ -55,11 +60,8 @@ button {
   white-space: nowrap;
 }
 
-/* Example: If you want a specific color for .bg-primary, 
-   define it in your Tailwind config or override here: 
+/* Example override for .bg-primary (if using Tailwind or a custom config)
 .bg-primary {
   background-color: #1DA1F2; 
 }
 */
-
-/* Add more media queries or styles as needed for your design */

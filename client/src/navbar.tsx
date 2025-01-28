@@ -7,7 +7,7 @@ import { MenuIcon } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard" },
-  { label: "History", path: "/history" },
+  { label: "Data", path: "/data" },
   { label: "Suggestions", path: "/suggestions" },
   { label: "Education", path: "/ticinfo" },
 ];

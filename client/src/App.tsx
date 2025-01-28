@@ -12,7 +12,7 @@ import Dashboard from "./dashboard";
 import Profile from "./profile";
 import LogNewTic from "./lognewtic";
 import Navbar from "./navbar";
-import TicTable from "./ticTable";
+import TicData from "./ticData";
 import LearnMore from "./learnmore";
 import Suggestions from "./suggestions";
 import TicInfo from "./ticinfo";
@@ -88,9 +88,9 @@ const App = () => {
               }
             />
             <Route
-              path="/history"
+              path="/data"
               element={
-                isAuthenticated ? <TicTable /> : <Navigate to="/login" />
+                isAuthenticated ? <TicData /> : <Navigate to="/login" />
               }
             />
             <Route
