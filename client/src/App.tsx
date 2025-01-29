@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -19,6 +19,62 @@ import TicInfo from "./ticinfo";
 import Footer from "./footer";
 
 const queryClient = new QueryClient();
+
+// A wrapper component to handle authentication and navigation
+const AppRoutes = ({ isAuthenticated }) => {
+  const location = useLocation();
+  const hideNavbar = ["/login", "/register"].includes(location.pathname.toLowerCase());
+
+  return (
+    <>
+      {/* Conditionally render Navbar */}
+      {!hideNavbar && <Navbar isLoggedIn={isAuthenticated} />}
+
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Index />} />
+        <Route
+          path="/login"
+          element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
+        />
+        <Route path="/register" element={<Login />} />
+        <Route path="/learn-more" element={<LearnMore />} />
+
+        {/* Authenticated routes */}
+        <Route
+          path="/dashboard"
+          element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/logtic/:ticType"
+          element={isAuthenticated ? <LogNewTic /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/profile"
+          element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/history"
+          element={isAuthenticated ? <TicTable /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/suggestions"
+          element={isAuthenticated ? <Suggestions /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/ticinfo"
+          element={isAuthenticated ? <TicInfo /> : <Navigate to="/login" />}
+        />
+
+        {/* Catch-all route */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+
+      {/* Conditionally render Footer */}
+      {!hideNavbar && <Footer />}
+    </>
+  );
+};
 
 const App = () => {
   const [authChecked, setAuthChecked] = useState(false);
@@ -41,79 +97,13 @@ const App = () => {
     );
   }
 
-  // If you ONLY want to hide the Navbar on the login page:
-  // const hideNavbar = window.location.pathname === "/login";
-
-  // If you ALSO want to hide the Navbar on the register page:
-  const hideNavbar = ["/login", "/register"].includes(
-    window.location.pathname.toLowerCase()
-  );
-
   return (
     <QueryClientProvider client={queryClient}>
-      <AnimatePresence mode="wait">
-        <BrowserRouter>
-          {/* Conditionally render Navbar and pass isLoggedIn */}
-          {!hideNavbar && <Navbar isLoggedIn={isAuthenticated} />}
-
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route
-              path="/login"
-              element={
-                isAuthenticated ? <Navigate to="/dashboard" /> : <Login />
-              }
-            />
-            <Route path="/register" element={<Login />} />
-            <Route path="/learn-more" element={<LearnMore />} />
-
-            {/* Authenticated routes */}
-            <Route
-              path="/dashboard"
-              element={
-                isAuthenticated ? <Dashboard /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/logtic/:ticType"
-              element={
-                isAuthenticated ? <LogNewTic /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                isAuthenticated ? <Profile /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                isAuthenticated ? <TicTable /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/suggestions"
-              element={
-                isAuthenticated ? <Suggestions /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/ticinfo"
-              element={
-                isAuthenticated ? <TicInfo /> : <Navigate to="/login" />
-              }
-            />
-
-            {/* Catch-all route */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-
-          {/* Conditionally render Footer */}
-          {!hideNavbar && <Footer />}
-        </BrowserRouter>
-      </AnimatePresence>
+      <BrowserRouter>
+        <AnimatePresence mode="wait">
+          <AppRoutes isAuthenticated={isAuthenticated} />
+        </AnimatePresence>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 };
