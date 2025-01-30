@@ -40,7 +40,7 @@ const Index = () => {
         transition={{ duration: 0.6 }}
         className="bg-[#4a90a1] text-white text-center px-6 py-4 rounded-lg max-w-md mb-8"
       >
-        <div className="bg-[#5ba8b9] rounded-3xl p-6 md:p-8 shadow-lg">
+        <div className="bg-[#256472] rounded-3xl p-6 md:p-8 shadow-lg">
           <p className="text-m md:text-base">
             <strong>TicVision</strong> empowers individuals with <strong>Tourette's Syndrome</strong> and their caregivers by combining <strong>advanced tools</strong> and <strong>insights</strong> to make tic management <strong>easier than ever</strong>.
           </p>
