@@ -7,9 +7,9 @@ import { MenuIcon } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard" },
-  { label: "History", path: "/history" },
+  { label: "Data", path: "/data" },
   { label: "Suggestions", path: "/suggestions" },
-  { label: "Information", path: "/ticinfo" },
+  { label: "Education", path: "/ticinfo" },
 ];
 
 const Navbar = ({ isLoggedIn }: { isLoggedIn: boolean }) => {

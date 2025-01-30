@@ -1,7 +1,7 @@
+import React, { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -12,16 +12,53 @@ import Dashboard from "./dashboard";
 import Profile from "./profile";
 import LogNewTic from "./lognewtic";
 import Navbar from "./navbar";
-import TicTable from "./ticTable";
+import TicData from "./ticData";          // from features-aamer
 import LearnMore from "./learnmore";
 import Suggestions from "./suggestions";
 import TicInfo from "./ticinfo";
 import Footer from "./footer";
 
+// If you have a TicTable component for /history:
+import TicTable from "./TicTable";
+
 const queryClient = new QueryClient();
 
-// A wrapper component to handle authentication and navigation
-const AppRoutes = ({ isAuthenticated }) => {
+function App() {
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check Firebase authentication state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setAuthChecked(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Show a loading indicator until Firebase auth check completes
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Main return
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AnimatePresence mode="wait">
+          <MainRoutes isAuthenticated={isAuthenticated} />
+        </AnimatePresence>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+
+// A sub-component that defines all routes and conditionally displays Navbar/Footer
+function MainRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
   const location = useLocation();
   const hideNavbar = ["/login", "/register"].includes(location.pathname.toLowerCase());
 
@@ -54,8 +91,8 @@ const AppRoutes = ({ isAuthenticated }) => {
           element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
         />
         <Route
-          path="/history"
-          element={isAuthenticated ? <TicTable /> : <Navigate to="/login" />}
+          path="/data"
+          element={isAuthenticated ? <TicData /> : <Navigate to="/login" />}
         />
         <Route
           path="/suggestions"
@@ -74,38 +111,7 @@ const AppRoutes = ({ isAuthenticated }) => {
       {!hideNavbar && <Footer />}
     </>
   );
-};
-
-const App = () => {
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAuthenticated(!!user);
-      setAuthChecked(true);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (!authChecked) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AnimatePresence mode="wait">
-          <AppRoutes isAuthenticated={isAuthenticated} />
-        </AnimatePresence>
-      </BrowserRouter>
-    </QueryClientProvider>
-  );
-};
+}
 
 export default App;
+

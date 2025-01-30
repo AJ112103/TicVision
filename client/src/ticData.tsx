@@ -4,6 +4,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "./firebase"; // Adjust paths as needed
 import { Chart } from "react-google-charts";
 import { ArrowUpDown } from "lucide-react";
+import "./ticData.css"; // Import your CSS file here
 
 // Interfaces
 interface TicData {
@@ -37,7 +38,7 @@ const timeRanges = {
 
 type TimeRangeKey = keyof typeof timeRanges;
 
-const TicTable: React.FC = () => {
+const TicData: React.FC = () => {
   // ---- STATES ----
   const [ticData, setTicData] = useState<TicData[]>([]);
   const [myTics, setMyTics] = useState<MyTic[]>([]);
@@ -55,19 +56,10 @@ const TicTable: React.FC = () => {
   const [chartModeIndex, setChartModeIndex] = useState<number>(0);
   const currentChartMode: ChartMode = chartModes[chartModeIndex];
 
-  // CHART PAGINATION
-  const [chartPageIndex, setChartPageIndex] = useState<number>(0);
-  const CHART_PAGE_SIZE = 10; // How many points to show per chart page
-
   // ---- EFFECTS ----
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Reset pagination when data or filters change
-  useEffect(() => {
-    setChartPageIndex(0);
-  }, [ticData, timeRangeFilter, specificDate, locationFilter, currentChartMode]);
 
   // ---- DATA FETCH ----
   const fetchData = async () => {
@@ -207,9 +199,11 @@ const TicTable: React.FC = () => {
         return "Number of Tics";
     }
   };
+
   const prevMode = () => {
     setChartModeIndex((prev) => (prev + chartModes.length - 1) % chartModes.length);
   };
+
   const nextMode = () => {
     setChartModeIndex((prev) => (prev + 1) % chartModes.length);
   };
@@ -250,7 +244,7 @@ const TicTable: React.FC = () => {
       return row;
     });
 
-    // Sort the grouped results by date or timeOfDay
+    // Sort by date or timeOfDay
     result.sort((a, b) => {
       if (groupingByTimeOfDay) {
         // Sort by time of day
@@ -258,7 +252,7 @@ const TicTable: React.FC = () => {
         const timeB = new Date(`2000-01-01 ${b.timeKey}`).getTime();
         return timeA - timeB;
       } else {
-        // Sort by date
+        // Sort by actual date
         const dateA = new Date(a.timeKey as string).getTime();
         const dateB = new Date(b.timeKey as string).getTime();
         return dateA - dateB;
@@ -317,29 +311,7 @@ const TicTable: React.FC = () => {
     return [header, ...rows];
   }, [chartRawData, allLocationsInChart]);
 
-  // Chart pagination
-  const totalDataPoints = chartDataForGoogle.length - 1; // minus the header
-  const totalPages = Math.ceil(totalDataPoints / CHART_PAGE_SIZE);
-
-  const pagedChartData = useMemo(() => {
-    if (chartDataForGoogle.length <= 1) return chartDataForGoogle;
-    const startIndex = chartPageIndex * CHART_PAGE_SIZE + 1; // skip header
-    const endIndex = startIndex + CHART_PAGE_SIZE;
-    const slicedRows = chartDataForGoogle.slice(startIndex, endIndex);
-    return [chartDataForGoogle[0], ...slicedRows];
-  }, [chartDataForGoogle, chartPageIndex]);
-
-  const canPrevPage = chartPageIndex > 0;
-  const canNextPage = chartPageIndex < totalPages - 1;
-
-  const goToPrevPage = () => {
-    if (canPrevPage) setChartPageIndex((prev) => prev - 1);
-  };
-  const goToNextPage = () => {
-    if (canNextPage) setChartPageIndex((prev) => prev + 1);
-  };
-
-  // Find max data value to set chart's Y-axis limit
+  // Find max data value for Y-axis limit
   const findMaxValue = (data: any[][]) => {
     let maxVal = 0;
     for (let i = 1; i < data.length; i++) {
@@ -352,7 +324,8 @@ const TicTable: React.FC = () => {
     }
     return maxVal;
   };
-  const maxDataValue = findMaxValue(pagedChartData);
+
+  const maxDataValue = findMaxValue(chartDataForGoogle);
   const chartMax = currentChartMode === "avg" ? 10 : Math.max(maxDataValue + 5, 5);
 
   const chartOptions = {
@@ -370,6 +343,40 @@ const TicTable: React.FC = () => {
     colors: allLocationsInChart.map((loc) => colorMap[loc]),
   };
 
+  /**
+ * Mobile-only sort button
+ * - Hidden on screens above 768px
+ * - Calls toggleSort() on click
+ */
+const MobileSortButton: React.FC<{
+  onSortClick: () => void;
+  sortDirection: "asc" | "desc";
+}> = ({ onSortClick, sortDirection }) => {
+  return (
+    <div className="block md:hidden mb-4 text-right">
+      <button
+        onClick={onSortClick}
+        className="p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors duration-200"
+        title={`Sort by date (${
+          sortDirection === "desc" ? "newest first" : "oldest first"
+        })`}
+      >
+        Sort by Date
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="inline-block ml-2 h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path d="M7 7l3-3m0 0l3 3m-3-3v18" strokeWidth={2} />
+        </svg>
+      </button>
+    </div>
+  );
+};
+
+
   // ---- RENDER ----
   return (
     <div className="bg-gray-50 min-h-screen py-8">
@@ -385,7 +392,7 @@ const TicTable: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          Tic History
+          Tic Data
         </motion.h2>
 
         {/* FILTERS */}
@@ -455,13 +462,11 @@ const TicTable: React.FC = () => {
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                       type="button"
                       onClick={() => toggleLocation(loc)}
-                      className={`px-3 py-1 rounded-full border text-sm transition-colors duration-200
-                        ${
-                          isSelected
-                            ? "bg-primary text-white border-primary"
-                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                        }
-                      `}
+                      className={`px-3 py-1 rounded-full border text-sm transition-colors duration-200 ${
+                        isSelected
+                          ? "bg-primary text-white border-primary"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                      }`}
                     >
                       {loc}
                     </motion.button>
@@ -541,37 +546,6 @@ const TicTable: React.FC = () => {
                 </button>
               </div>
 
-              {/* PAGINATION CONTROLS (Above Chart) */}
-              {totalPages > 1 && (
-                <div className="flex justify-center gap-4 mb-2">
-                  <button
-                    onClick={goToPrevPage}
-                    disabled={!canPrevPage}
-                    className={`px-3 py-1 rounded transition-colors duration-200 ${
-                      canPrevPage
-                        ? "bg-gray-200 hover:bg-gray-300"
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    }`}
-                  >
-                    Prev
-                  </button>
-                  <div className="text-sm flex items-center">
-                    Page {chartPageIndex + 1} of {totalPages}
-                  </div>
-                  <button
-                    onClick={goToNextPage}
-                    disabled={!canNextPage}
-                    className={`px-3 py-1 rounded transition-colors duration-200 ${
-                      canNextPage
-                        ? "bg-gray-200 hover:bg-gray-300"
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    }`}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-
               {/* Chart Container */}
               <div className="w-full h-[400px] sm:h-[500px] overflow-hidden">
                 <Chart
@@ -583,7 +557,7 @@ const TicTable: React.FC = () => {
                       <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
                     </div>
                   }
-                  data={pagedChartData}
+                  data={chartDataForGoogle}
                   options={chartOptions}
                 />
               </div>
@@ -595,11 +569,18 @@ const TicTable: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <h3 className="text-xl mb-4 font-semibold">Tic History Table</h3>
+              <h3 className="text-xl mb-4 font-semibold">Tic Data Table</h3>
+
+              {/* Mobile Sort Button */}
+              <MobileSortButton
+                onSortClick={toggleSort}         // use your existing toggleSort
+                sortDirection={sortDirection}    // pass in the current sort direction
+              />
 
               {/* Table Container */}
               <div className="overflow-x-auto">
-                <table className="min-w-full bg-white rounded-lg overflow-hidden border">
+                {/* Add the .tic-table class to apply our custom CSS */}
+                <table className="tic-table min-w-full bg-white rounded-lg overflow-hidden border">
                   <thead className="bg-primary text-white">
                     <tr>
                       <th className="py-3 px-6 text-left">
@@ -664,4 +645,4 @@ const TicTable: React.FC = () => {
   );
 };
 
-export default TicTable;
+export default TicData;
