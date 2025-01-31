@@ -47,80 +47,194 @@ const CardContent = ({ className = "", children, ...props }: React.HTMLAttribute
 function mapLocationToCategory(location: string): string | undefined {
   const loc = location.toLowerCase();
   
-  if (loc.includes('arm') || loc.includes('hand')) return 'Arm';
-  if (loc.includes('complex') || loc.includes('blocking')) return 'Complex Vocal';
-  if (loc.includes('(eyes)')) return 'Eye';
-  if (loc.includes('(jaw)')) return 'Jaw';
-  if (loc.includes('leg') || loc.includes('foot') || loc.includes('toe')) return 'Leg';
-  if (loc.includes('(mouth)')) return 'Mouth';
-  if (loc.includes('neck')) return 'Neck';
-  if (loc.includes('shoulder')) return 'Shoulder';
-  if (loc.includes('vocal simple') || loc.includes('breathing sounds') || loc.includes('animal sounds')) return 'Simple Vocal';
-  if (loc.includes('stomach')) return 'Stomach';
-  if (loc.includes('word') || loc.includes('phrase') || loc.includes('repetition') || loc.includes('palilalia')) return 'Word Phrase';
+  // Vocal Tics - Map to specific categories
+  if (loc.includes('simple vocal') || loc.includes('grunt') || loc.includes('cough') || 
+      loc.includes('throat clear') || loc.includes('sniff')) {
+    return 'Vocal Simple';
+  }
+  if (loc.includes('complex vocal') || loc.includes('multiple sounds')) {
+    return 'Vocal Complex';
+  }
+  if (loc.includes('word') && !loc.includes('phrase')) {
+    return 'Vocal Word';
+  }
+  if (loc.includes('phrase') || loc.includes('sentence')) {
+    return 'Vocal Phrase';
+  }
+  if (loc.includes('breathing') || loc.includes('breath')) {
+    return 'Vocal Breathing Sounds';
+  }
+  if (loc.includes('echo') || loc.includes('repeat after')) {
+    return 'Vocal Repetition';
+  }
+  if (loc.includes('block') || loc.includes('stuck')) {
+    return 'Vocal Blocking';
+  }
+  if (loc.includes('palilalia') || loc.includes('repeat own')) {
+    return 'Vocal Palilalia';
+  }
+  if (loc.includes('animal') || loc.includes('bark') || loc.includes('meow')) {
+    return 'Vocal Animal Sounds';
+  }
+  
+  // Motor Tics
+  if (loc.includes('breathing') && !loc.includes('vocal')) {
+    return 'Motor Breathing';
+  }
+  if (loc.includes('eyes') || loc.includes('blink')) {
+    return 'Motor Face (Eyes)';
+  }
+  if (loc.includes('jaw')) {
+    return 'Motor Face (Jaw)';
+  }
+  if (loc.includes('mouth') && !loc.includes('vocal')) {
+    return 'Motor Face (Mouth)';
+  }
+  if (loc.includes('neck')) {
+    return 'Motor Neck';
+  }
+  if (loc.includes('shoulder')) {
+    return 'Motor Shoulder';
+  }
+  if (loc.includes('chest')) {
+    return 'Motor Chest';
+  }
+  if (loc.includes('stomach')) {
+    return 'Motor Stomach';
+  }
+  if (loc.includes('arm')) {
+    return 'Motor Arm';
+  }
+  if (loc.includes('hand') || loc.includes('finger')) {
+    return 'Motor Hand/Finger';
+  }
+  if (loc.includes('foot') || loc.includes('toe')) {
+    return 'Motor Foot/Toe';
+  }
+  if (loc.includes('pelvis') || loc.includes('hip')) {
+    return 'Motor Pelvis';
+  }
+  if (loc.includes('leg')) {
+    return 'Motor Leg';
+  }
+  if (loc.includes('back')) {
+    return 'Motor Back';
+  }
+  if (loc.includes('combined') || loc.includes('multiple') || 
+      (loc.match(/\band\b/) && !loc.includes('vocal'))) {
+    return 'Motor Combined Movements';
+  }
+  
+  // Default mappings for general vocal tics that don't fit specific categories
+  if (loc.includes('vocal')) {
+    if (loc.includes('repeat') || loc.includes('same')) {
+      return 'Vocal Palilalia';
+    }
+    if (loc.includes('complex')) {
+      return 'Vocal Complex';
+    }
+    return 'Vocal Simple'; // Default for unspecified vocal tics
+  }
+  
   return undefined;
 }
 
 const suggestionsMap: { [key: string]: string[] } = {
-  Arm: [
-    'Keep your hands in your pockets or hold them together',
-    'Hold a small object like a stress ball to focus your movements',
-    'Tap your fingers on a table purposefully to control the movement',
-    'Squeeze your fist tightly for a few seconds then release',
+  'Vocal Simple': [
+    'Try taking deep, slow breaths to ease the urge to make sounds.',
+    'Replace the sound with a quiet hum or a soft exhale.',
   ],
-  'Complex Vocal': [
-    'Hum softly instead of repeating words or noises',
-    'Take a deep breath and let it out slowly to relax your throat',
-    'Sip some water to help restart your speech flow',
-    'Exhale gently to relax your vocal cords',
+  'Vocal Complex': [
+    'Hum softly instead of repeating words or noises.',
+    'Take a deep breath and let it out slowly to relax your throat.',
   ],
-  Eye: [
-    'Blink slowly and deliberately to calm repetitive blinking',
-    'Gently massage around your eyes to relax the muscles',
+  'Vocal Word': [
+    'Think of a calming word to repeat in your head instead of out loud.',
+    'Gently press your lips together when you feel the urge to speak a word.',
   ],
-  Jaw: [
-    'Open and close your mouth slowly to stretch your jaw',
-    'Chew gum to give your jaw something to do',
+  'Vocal Phrase': [
+    'Try whispering the phrase instead of saying it loudly.',
+    'Pause and take a slow, deep breath when the urge comes.',
   ],
-  Leg: [
-    'Cross your legs or place your feet flat on the ground',
-    'Slowly lift your leg and lower it to regain control',
-    'Press your feet firmly on the ground to stabilize them',
-    'Curl your toes tightly and hold for a moment then release',
+  'Vocal Breathing Sounds': [
+    'Breathe in for 4 counts, then out for 6 counts to calm your breathing.',
+    'Rest a hand on your chest and focus on keeping your breaths steady.',
   ],
-  Mouth: [
-    'Press your tongue against the roof of your mouth to keep it still',
-    'Keep your lips gently closed to avoid biting your cheek',
+  'Vocal Repetition': [
+    'Repeat the word or phrase quietly in your mind instead of out loud.',
+    'Slow down how you speak to reduce the urge to echo.',
   ],
-  Neck: [
-    'Try gentle neck stretches to ease the urge',
-    'Place your hand on your chin to hold it steady when the tic starts',
+  'Vocal Blocking': [
+    'Sip some water to help restart your speech flow.',
+    'Exhale gently to relax your vocal cords.',
   ],
-  Shoulder: [
-    'Shrug your shoulders up, hold for a moment, then relax',
-    'Rest your hands in your lap to keep your shoulders still',
+  'Vocal Palilalia': [
+    'Pause between words by counting to 3 in your head.',
+    'Say the repeated word quietly in your mind to redirect the tic.',
   ],
-  'Simple Vocal': [
-    'Try taking deep, slow breaths to ease the urge to make sounds',
-    'Replace the sound with a quiet hum or a soft exhale',
-    'Breathe in for 4 counts then out for 6 counts to calm your breathing',
-    'Rest a hand on your chest and focus on keeping your breaths steady',
-    'Replace animal sounds with a soft hum to manage the urge',
-    'Lightly clench your teeth to keep the sound from forming',
+  'Vocal Animal Sounds': [
+    'Replace the sound with a soft hum to manage the urge.',
+    'Lightly clench your teeth to keep the sound from forming.',
   ],
-  Stomach: [
-    'Tighten your stomach muscles for a few seconds then relax',
-    'Rub your stomach in circles to ease the tension',
+  'Motor Breathing': [
+    'Practice slow, steady breathing to help keep it regular.',
+    'Hold something soft, like a stress ball, to shift your focus.',
   ],
-  'Word Phrase': [
-    'Think of a calming word to repeat in your head instead of out loud',
-    'Gently press your lips together when you feel the urge to speak a word',
-    'Try whispering a phrase instead of saying it loudly',
-    'Pause and take a slow deep breath when the urge comes',
-    'Repeat words or phrases quietly in your mind instead of out loud',
-    'Slow down how you speak to reduce the urge to echo',
-    'Pause between words by counting to three in your head',
-    'Say the repeated word quietly in your mind to redirect the tic',
+  'Motor Face (Eyes)': [
+    'Blink slowly and deliberately to calm repetitive blinking.',
+    'Gently massage around your eyes to relax the muscles.',
+  ],
+  'Motor Face (Jaw)': [
+    'Open and close your mouth slowly to stretch your jaw.',
+    'Chew gum to give your jaw something to do.',
+  ],
+  'Motor Face (Mouth)': [
+    'Press your tongue against the roof of your mouth to keep it still.',
+    'Keep your lips gently closed to avoid biting your cheek.',
+  ],
+  'Motor Neck': [
+    'Try gentle neck stretches to ease the urge.',
+    'Place your hand on your chin to hold it steady when the tic starts.',
+  ],
+  'Motor Shoulder': [
+    'Shrug your shoulders up, hold for a moment, then relax.',
+    'Rest your hands in your lap to keep your shoulders still.',
+  ],
+  'Motor Chest': [
+    'Take a deep breath in and out to release tension in your chest.',
+    'Tap lightly on your chest to redirect the tic.',
+  ],
+  'Motor Stomach': [
+    'Tighten your stomach muscles for a few seconds, then relax.',
+    'Rub your stomach in circles to ease the tension.',
+  ],
+  'Motor Arm': [
+    'Keep your hands in your pockets or hold them together.',
+    'Hold a small object, like a stress ball, to focus your movements.',
+  ],
+  'Motor Hand/Finger': [
+    'Tap your fingers on a table purposefully to control the movement.',
+    'Squeeze your fist tightly for a few seconds, then release.',
+  ],
+  'Motor Foot/Toe': [
+    'Press your feet firmly on the ground to stabilize them.',
+    'Curl your toes tightly, hold for a moment, then release.',
+  ],
+  'Motor Pelvis': [
+    'Sit down and gently tilt your pelvis forward and back to calm the movement.',
+    'Tighten your glutes for a few seconds, then relax.',
+  ],
+  'Motor Leg': [
+    'Cross your legs or place your feet flat on the ground.',
+    'Slowly lift your leg and lower it to regain control.',
+  ],
+  'Motor Back': [
+    'Sit against a chair and press your back into it for support.',
+    'Stretch your spine gently by leaning forward, then backward.',
+  ],
+  'Motor Combined Movements': [
+    'Focus on controlling one part of the movement at a time.',
+    'Try a relaxation exercise, like tensing all your muscles, then releasing.',
   ],
 };
 
