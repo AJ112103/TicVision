@@ -1,3 +1,5 @@
+// App.tsx
+
 import React, { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -12,14 +14,11 @@ import Dashboard from "./dashboard";
 import Profile from "./profile";
 import LogNewTic from "./lognewtic";
 import Navbar from "./navbar";
-import TicData from "./ticData";          // from features-aamer
+import TicData from "./ticData";
 import LearnMore from "./learnmore";
 import Suggestions from "./suggestions";
 import TicInfo from "./ticinfo";
 import Footer from "./footer";
-
-// If you have a TicTable component for /history:
-import TicTable from "./TicTable";
 
 const queryClient = new QueryClient();
 
@@ -45,7 +44,6 @@ function App() {
     );
   }
 
-  // Main return
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -57,14 +55,13 @@ function App() {
   );
 }
 
-// A sub-component that defines all routes and conditionally displays Navbar/Footer
 function MainRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
   const location = useLocation();
   const hideNavbar = ["/login", "/register"].includes(location.pathname.toLowerCase());
 
   return (
     <>
-      {/* Conditionally render Navbar */}
+      {/* Conditionally render the Navbar unless on login/register page */}
       {!hideNavbar && <Navbar isLoggedIn={isAuthenticated} />}
 
       <Routes>
@@ -107,11 +104,10 @@ function MainRoutes({ isAuthenticated }: { isAuthenticated: boolean }) {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
-      {/* Conditionally render Footer */}
+      {/* Conditionally render the Footer unless on login/register page */}
       {!hideNavbar && <Footer />}
     </>
   );
 }
 
 export default App;
-
