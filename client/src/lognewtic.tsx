@@ -17,7 +17,7 @@ import stomachIcon from "./assets/stomach-icon.svg";
 import simpleIcon from "./assets/simple-icon.svg";
 import echolaliaIcon from "./assets/echolalia-icon.svg";
 import coprolaliaIcon from "./assets/coprolalia-icon.svg";
-import animalsoundIcon from "./assets/animal-sound-icon.svg";
+import animalsoundIcon from "./assets/animal-sounds-icon.svg";
 import chestIcon from "./assets/chest-icon.svg";
 import headIcon from "./assets/head-icon.svg";
 import pelvisIcon from "./assets/pelvis-icon.svg";
