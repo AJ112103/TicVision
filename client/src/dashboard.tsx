@@ -51,7 +51,7 @@ const Dashboard = () => {
             (latestAdvice.advice[adviceIndex]?.slice(3) || "Log at least 10 tics to receive AI advice")
           );          
         } else {
-          setAdvice("No advice available.");
+          setAdvice("Log at least 10 tics to receive AI advice");
         }
       } catch (error) {
         console.error("Error fetching advice:", error);
