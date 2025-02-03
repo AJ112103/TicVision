@@ -127,14 +127,15 @@ const TicInfo: React.FC = () => {
         <CardContent>
           <div className="space-y-4">
             <p><strong>Vocal Simple:</strong> Short, repetitive sounds such as grunting, throat clearing, sniffing, or clicking noises that occur involuntarily.</p>
-            <p><strong>Vocal Complex:</strong> Involves multi-syllabic sounds or patterned vocalizations, like repeating certain words, humming, or making rhythmic noises.</p>
             <p><strong>Vocal Word:</strong> Sudden utterance of individual words, often abrupt and unrelated to the current context or conversation.</p>
             <p><strong>Vocal Phrase:</strong> Involuntary production of short phrases or sentences, which may feel uncontrollable and occur unexpectedly.</p>
             <p><strong>Vocal Breathing Sounds:</strong> Involves noises like gasping, sighing, or forceful inhaling.</p>
+            <p><strong>Vocal Complex:</strong> Speech-like utterances. They often include words, phrases, or even complete sentences that may appear purposeful but are involuntary. Common types include: Echolalia, Palilalia and Coprolalia.</p>
             <p><strong>Vocal Repetition (Echolalia):</strong> Repeating words or phrases spoken by others.</p>
-            <p><strong>Vocal Blocking:</strong> Sudden pauses or breaks while speaking.</p>
             <p><strong>Vocal Palilalia:</strong> Repeating one’s own words or phrases.</p>
+            <p><strong>Vocal Coprolalia:</strong> Involuntary outbursts of socially inappropriate or obscene words or phrases.</p>
             <p><strong>Vocal Animal Sounds:</strong> Involves sounds like barking, meowing, or chirping.</p>
+            
           </div>
         </CardContent>
       </Card>

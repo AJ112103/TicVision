@@ -44,24 +44,37 @@ const CardContent = ({ className = "", children, ...props }: React.HTMLAttribute
   </div>
 );
 
+/**
+ * Updated mapLocationToCategory function.
+ * It now checks for specific tic keywords (based on tic name/location)
+ * and returns category strings that exactly match the keys in suggestionsMap.
+ */
 function mapLocationToCategory(location: string): string | undefined {
   const loc = location.toLowerCase();
-  
-  // Vocal Tics - Map to specific categories
-  if (loc.includes('simple vocal') || loc.includes('grunt') || loc.includes('cough') || 
+
+  // Specific Vocal Tics
+  if (loc.includes('coprolalia')) {
+    return 'Coprolalia (Involuntary Swearing or Socially Inappropriate Words)';
+  }
+  if (loc.includes('echolalia')) {
+    return 'Echolalia (Repeating Others’ Words)';
+  }
+  if (loc.includes('palilalia')) {
+    return 'Palilalia (Repeating One’s Own Words)';
+  }
+  if (loc.includes('animal')) {
+    return 'Animal Sounds Tics (e.g., barking, meowing, chirping)';
+  }
+
+  // General Vocal Tics
+  if (loc.includes('simple vocal') || loc.includes('grunt') || loc.includes('cough') ||
       loc.includes('throat clear') || loc.includes('sniff')) {
     return 'Vocal Simple';
   }
-  if (loc.includes('complex vocal') || loc.includes('multiple sounds')) {
-    return 'Vocal Complex';
+  if ((loc.includes('word') || loc.includes('phrase')) && !loc.includes('echolalia') && !loc.includes('palilalia')) {
+    return 'Vocal Word / Phrase';
   }
-  if (loc.includes('word') && !loc.includes('phrase')) {
-    return 'Vocal Word';
-  }
-  if (loc.includes('phrase') || loc.includes('sentence')) {
-    return 'Vocal Phrase';
-  }
-  if (loc.includes('breathing') || loc.includes('breath')) {
+  if (loc.includes('breathing') && loc.includes('vocal')) {
     return 'Vocal Breathing Sounds';
   }
   if (loc.includes('echo') || loc.includes('repeat after')) {
@@ -70,25 +83,19 @@ function mapLocationToCategory(location: string): string | undefined {
   if (loc.includes('block') || loc.includes('stuck')) {
     return 'Vocal Blocking';
   }
-  if (loc.includes('palilalia') || loc.includes('repeat own')) {
-    return 'Vocal Palilalia';
-  }
-  if (loc.includes('animal') || loc.includes('bark') || loc.includes('meow')) {
-    return 'Vocal Animal Sounds';
-  }
-  
+
   // Motor Tics
-  if (loc.includes('breathing') && !loc.includes('vocal')) {
-    return 'Motor Breathing';
-  }
-  if (loc.includes('eyes') || loc.includes('blink')) {
-    return 'Motor Face (Eyes)';
-  }
-  if (loc.includes('jaw')) {
-    return 'Motor Face (Jaw)';
+  if (loc.includes('head')) {
+    return 'Motor Head';
   }
   if (loc.includes('mouth') && !loc.includes('vocal')) {
-    return 'Motor Face (Mouth)';
+    return 'Motor Mouth (e.g., tongue/cheek biting, teeth clenching)';
+  }
+  if (loc.includes('jaw')) {
+    return 'Motor Jaw';
+  }
+  if (loc.includes('breathing') && !loc.includes('vocal')) {
+    return 'Motor Breathing (e.g., gasping, forceful exhaling)';
   }
   if (loc.includes('neck')) {
     return 'Motor Neck';
@@ -100,101 +107,99 @@ function mapLocationToCategory(location: string): string | undefined {
     return 'Motor Chest';
   }
   if (loc.includes('stomach')) {
-    return 'Motor Stomach';
+    return 'Motor Stomach (e.g., tensing, contracting)';
   }
   if (loc.includes('arm')) {
-    return 'Motor Arm';
+    return 'Motor Arm (e.g., arm flapping, flexing)';
   }
   if (loc.includes('hand') || loc.includes('finger')) {
-    return 'Motor Hand/Finger';
+    return 'Motor Hand (e.g., finger snapping, wrist flicking)';
+  }
+  if (loc.includes('eyes') || loc.includes('blink')) {
+    return 'Motor Eye (e.g., blinking, squinting, rolling)';
   }
   if (loc.includes('foot') || loc.includes('toe')) {
-    return 'Motor Foot/Toe';
+    return 'Motor Foot/Toe (e.g., tapping, stomping)';
   }
   if (loc.includes('pelvis') || loc.includes('hip')) {
-    return 'Motor Pelvis';
+    return 'Motor Pelvis (e.g., thrusting, clenching)';
   }
   if (loc.includes('leg')) {
-    return 'Motor Leg';
+    return 'Motor Leg (e.g., kicking, tensing)';
   }
   if (loc.includes('back')) {
-    return 'Motor Back';
+    return 'Motor Back (e.g., arching, twisting)';
   }
-  if (loc.includes('combined') || loc.includes('multiple') || 
+  if (loc.includes('combined') || loc.includes('multiple') ||
       (loc.match(/\band\b/) && !loc.includes('vocal'))) {
     return 'Motor Combined Movements';
   }
-  
-  // Default mappings for general vocal tics that don't fit specific categories
+
+  // Default for unspecified vocal tics that include the word "vocal"
   if (loc.includes('vocal')) {
-    if (loc.includes('repeat') || loc.includes('same')) {
-      return 'Vocal Palilalia';
-    }
-    if (loc.includes('complex')) {
-      return 'Vocal Complex';
-    }
-    return 'Vocal Simple'; // Default for unspecified vocal tics
+    return 'Vocal Simple';
   }
-  
+
   return undefined;
 }
 
+/**
+ * Updated suggestionsMap:
+ * The keys now exactly match the categories returned by mapLocationToCategory,
+ * ensuring that every suggestion is linked to the specific tic type.
+ */
 const suggestionsMap: { [key: string]: string[] } = {
   'Vocal Simple': [
-    'Try taking deep, slow breaths to ease the urge to make sounds.',
-    'Replace the sound with a quiet hum or a soft exhale.',
+    'Competing Response: Try slow, controlled breathing (inhale for 4 seconds, exhale for 6) when you feel the urge to tic. This engages incompatible muscle movements, reducing tic frequency.',
+    'Awareness Training: Record when and where the tic occurs most often to identify triggers (e.g., stress, boredom). Once identified, practice relaxation techniques in those situations.',
   ],
-  'Vocal Complex': [
-    'Hum softly instead of repeating words or noises.',
-    'Take a deep breath and let it out slowly to relax your throat.',
+  'Coprolalia (Involuntary Swearing or Socially Inappropriate Words)': [
+    'Delayed Response Strategy: When you feel the tic urge, practice pausing and replacing it with a neutral sound (e.g., humming). Over time, this can help weaken the automatic urge.',
+    'Distraction Technique: Engage in repetitive fine motor tasks (e.g., squeezing a stress ball, tapping fingers in a pattern) when coprolalia urges arise to redirect motor energy.'
   ],
-  'Vocal Word': [
-    'Think of a calming word to repeat in your head instead of out loud.',
-    'Gently press your lips together when you feel the urge to speak a word.',
+  'Echolalia (Repeating Others’ Words)': [
+    'Response Interruption: When you catch yourself about to repeat a word, try mentally substituting a different word or phrase instead. This helps disrupt the automatic repetition loop.',
+    'CBT Reframing: Identify situations where echolalia increases and practice self-talk strategies (e.g., internally saying, I don’t need to repeat this before responding).'
   ],
-  'Vocal Phrase': [
-    'Try whispering the phrase instead of saying it loudly.',
-    'Pause and take a slow, deep breath when the urge comes.',
+  'Palilalia (Repeating One’s Own Words)': [
+    'Slow-Paced Speech: Speak deliberately slower to reduce the automatic urge to repeat. Practicing a rhythmic speech pattern (e.g., pausing between words) can help regulate repetitions.',
+    'Tension Awareness: Recognize body tension before the tic and try progressive muscle relaxation techniques (tighten and release jaw, hands, etc.) before speaking.'
   ],
-  'Vocal Breathing Sounds': [
-    'Breathe in for 4 counts, then out for 6 counts to calm your breathing.',
-    'Rest a hand on your chest and focus on keeping your breaths steady.',
+  'Animal Sounds Tics (e.g., barking, meowing, chirping)': [
+    'Alternative Response Training: Replace the tic with a quiet breath or controlled whisper. Practicing a "soft exhale" can help break the tic cycle.',
+    'Pattern Disruption: If certain sounds trigger the tic, try changing your environment or engaging in cognitive distractions (e.g., counting backward).'
   ],
-  'Vocal Repetition': [
-    'Repeat the word or phrase quietly in your mind instead of out loud.',
-    'Slow down how you speak to reduce the urge to echo.',
+  'Vocal Word / Phrase': [
+    'Mindfulness and Delay Strategy: When you feel the urge, try delaying the tic by a few seconds and gradually increasing the delay over time.',
+    'Silent Repetition: Instead of saying the phrase aloud, practice mouthing the words without sound. This can help phase out the vocal component.',
   ],
-  'Vocal Blocking': [
-    'Sip some water to help restart your speech flow.',
-    'Exhale gently to relax your vocal cords.',
+  'Motor Head': [
+    'Competing Response: Practice holding your head still while engaging in a different controlled movement (e.g., pressing your tongue against the roof of your mouth).',
+    'Postural Awareness: Pay attention to posture and balance; standing or sitting with proper alignment can sometimes reduce involuntary head movements.'
   ],
-  'Vocal Palilalia': [
-    'Pause between words by counting to 3 in your head.',
-    'Say the repeated word quietly in your mind to redirect the tic.',
+  'Motor Mouth (e.g., tongue/cheek biting, teeth clenching)': [
+    'Incompatible Response: Keep a small object like sugar-free gum or a rubber chewable in your mouth to prevent excessive biting.',
+    'Oral Relaxation Technique: Try progressive jaw relaxation—open your mouth slightly, hold for 5 seconds, then gently close. Repeat to release built-up tension.',
   ],
-  'Vocal Animal Sounds': [
-    'Replace the sound with a soft hum to manage the urge.',
-    'Lightly clench your teeth to keep the sound from forming.',
+  'Motor Jaw': [
+    'Counterpressure Exercise: Apply gentle resistance by pressing your tongue against the roof of your mouth when you feel the urge to tic.',
+    'Stretching Routine: Slow, circular jaw movements before speaking or eating can help reduce muscle tension and tic frequency.',
   ],
-  'Motor Breathing': [
-    'Practice slow, steady breathing to help keep it regular.',
-    'Hold something soft, like a stress ball, to shift your focus.',
-  ],
-  'Motor Face (Eyes)': [
-    'Blink slowly and deliberately to calm repetitive blinking.',
-    'Gently massage around your eyes to relax the muscles.',
-  ],
-  'Motor Face (Jaw)': [
-    'Open and close your mouth slowly to stretch your jaw.',
-    'Chew gum to give your jaw something to do.',
-  ],
-  'Motor Face (Mouth)': [
-    'Press your tongue against the roof of your mouth to keep it still.',
-    'Keep your lips gently closed to avoid biting your cheek.',
+  'Motor Breathing (e.g., gasping, forceful exhaling)': [
+    'Paced Breathing: Practice a 4-7-8 breathing technique (inhale for 4 seconds, hold for 7, exhale for 8) to regulate involuntary breathing patterns.',
+    'Biofeedback Awareness: Use a hand on your stomach to feel and control the rhythm of your breath, reinforcing steady, controlled inhalations and exhalations.',
   ],
   'Motor Neck': [
-    'Try gentle neck stretches to ease the urge.',
-    'Place your hand on your chin to hold it steady when the tic starts.',
+    'Gentle Counter-Movement: When you feel the tic coming, hold your neck straight and engage a different muscle group (e.g., lightly shrug your shoulders).',
+    'Neck Stretching: Slowly tilt your head from side to side and hold for a few seconds to release tension and prevent reinforcement of the tic movement.',
+  ],
+  'Motor Eye (e.g., blinking, squinting, rolling)': [
+    'Fixed Focus Strategy: When you feel an urge, focus on an object and blink deliberately every few seconds instead of spontaneously.',
+    'Hydration & Eye Exercises: If excessive blinking worsens with screen time, take breaks and do controlled slow-blink exercises.',
+  ],
+  'Motor Hand (e.g., finger snapping, wrist flicking)': [
+    'Object Substitution: Hold a small stress ball, fidget toy, or textured fabric to redirect the need for movement into a controlled alternative.',
+    'Fine Motor Engagement: Try light finger tapping or controlled writing exercises to engage the hand differently and reduce tic repetition.',
   ],
   'Motor Shoulder': [
     'Shrug your shoulders up, hold for a moment, then relax.',
@@ -204,33 +209,29 @@ const suggestionsMap: { [key: string]: string[] } = {
     'Take a deep breath in and out to release tension in your chest.',
     'Tap lightly on your chest to redirect the tic.',
   ],
-  'Motor Stomach': [
-    'Tighten your stomach muscles for a few seconds, then relax.',
-    'Rub your stomach in circles to ease the tension.',
+  'Motor Arm (e.g., arm flapping, flexing)': [
+    'Isometric Holding: Gently press your hands together or against a stable surface when you feel the tic urge—this provides resistance to movement.',
+    'Progressive Muscle Relaxation: Clench and release your arm muscles to consciously relieve excess energy.',
   ],
-  'Motor Arm': [
-    'Keep your hands in your pockets or hold them together.',
-    'Hold a small object, like a stress ball, to focus your movements.',
+  'Motor Stomach (e.g., tensing, contracting)': [
+    'Breath Awareness Training: Place a hand on your stomach and practice slow abdominal breathing to counteract unconscious clenching.',
+    'Postural Adjustments: Ensure your seating position is comfortable, as poor posture can reinforce unnecessary stomach tensing.',
   ],
-  'Motor Hand/Finger': [
-    'Tap your fingers on a table purposefully to control the movement.',
-    'Squeeze your fist tightly for a few seconds, then release.',
+  'Motor Back (e.g., arching, twisting)': [
+    'Controlled Stretching: Perform slow back stretches to reduce tension and promote relaxation, preventing automatic tic reinforcement.',
+    'Stability Exercises: Strengthening core muscles can help stabilize involuntary back movements over time.',
   ],
-  'Motor Foot/Toe': [
-    'Press your feet firmly on the ground to stabilize them.',
-    'Curl your toes tightly, hold for a moment, then release.',
+  'Motor Foot/Toe (e.g., tapping, stomping)': [
+    'Alternative Movement: Replace tic-related foot movements with deliberate, slow ankle rotations to retrain muscle control.',
+    'Weighted Sensory Feedback: Wearing slightly heavier shoes or compression socks may help provide grounding and reduce tic frequency.',
   ],
-  'Motor Pelvis': [
-    'Sit down and gently tilt your pelvis forward and back to calm the movement.',
-    'Tighten your glutes for a few seconds, then relax.',
+  'Motor Pelvis (e.g., thrusting, clenching)': [
+    'Isometric Core Engagement: Squeeze and release different core muscles (e.g., glutes or lower abs) in a controlled manner to prevent involuntary tics.',
+    'Discreet Grounding Techniques: When sitting, try lightly pressing your feet into the floor to redirect motor energy away from the pelvic region.',
   ],
-  'Motor Leg': [
-    'Cross your legs or place your feet flat on the ground.',
-    'Slowly lift your leg and lower it to regain control.',
-  ],
-  'Motor Back': [
-    'Sit against a chair and press your back into it for support.',
-    'Stretch your spine gently by leaning forward, then backward.',
+  'Motor Leg (e.g., kicking, tensing)': [
+    'Controlled Resistance: When you feel the tic urge, press your feet firmly into the ground and hold for a few seconds.',
+    'Seated Counter-Tension: If sitting, gently press your legs together or engage a different muscle (e.g., curling toes) to shift focus away from the tic',
   ],
   'Motor Combined Movements': [
     'Focus on controlling one part of the movement at a time.',
@@ -332,7 +333,7 @@ const Suggestions: React.FC = () => {
     );
   };
 
-  // Extract categories from the filtered data
+  // Extract categories from the filtered data using our updated mapping function
   const categoriesFromFilteredData = Array.from(
     new Set(filteredData.map(tic => mapLocationToCategory(tic.location)))
   ).filter(Boolean) as string[];
@@ -475,7 +476,7 @@ const Suggestions: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            // Render suggestions based on categories in filtered data
+            // Render suggestions based on categories from filtered data
             categoriesFromFilteredData.map((category, idx) => {
               const suggestions = suggestionsMap[category] || [];
               if (suggestions.length === 0) return null;
