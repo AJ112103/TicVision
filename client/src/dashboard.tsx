@@ -48,10 +48,10 @@ const Dashboard = () => {
           const latestAdvice = adviceSnapshot.docs[0].data();
           const adviceIndex = ticCounter % 10; // Determine the advice index based on the remainder
           setAdvice(
-            (latestAdvice.advice[adviceIndex]?.slice(3) || "No advice available.")
+            (latestAdvice.advice[adviceIndex]?.slice(3) || "Log at least 10 tics to receive AI advice")
           );          
         } else {
-          setAdvice("No advice available.");
+          setAdvice("Log at least 10 tics to receive AI advice");
         }
       } catch (error) {
         console.error("Error fetching advice:", error);
