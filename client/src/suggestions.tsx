@@ -491,7 +491,7 @@ const Suggestions: React.FC = () => {
                   <Card>
                     <CardHeader>
                       <CardTitle>
-                        {category} Tic Suggestions
+                        {category}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
