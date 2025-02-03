@@ -120,19 +120,15 @@ exports.logTic = functions.https.onRequest(async (req: { headers: { authorizatio
         {
           role: "user",
           content: `
-  Based on the following tic data, provide 10 pieces of actionable advice to help manage or understand the user's tics.
-  The advice should be numbered sequentially, starting from ${ticStartNumber} to ${ticStartNumber + 9}.
-  Make the advice specific to patterns, intensity, and frequency observed in the data.
-  
-  Tic Data:
-  ${ticDataString}
-  
-  Please ensure that the list strictly begins at ${ticStartNumber} and ends at ${ticStartNumber + 9}, and each piece of advice is concise.
-
-  Only send a numbered list, nothing else.
+      Based on the following tic data, generate 10 personalized, actionable suggestions to help the user manage and better understand their tics. The advice must be rooted in evidence-based approaches, including Comprehensive Behavioral Intervention for Tics (CBIT), Habit Reversal Therapy (HRT), and Cognitive Behavioral Therapy (CBT). Ensure that each suggestion is tailored to the user’s specific tic type, intensity, frequency, and observed tic patterns or trends. The recommendations should be practical, clear, and user-friendly, with a focus on enhancing self-awareness and effective management.
+      
+      The advice should be numbered sequentially, starting from ${ticStartNumber} to ${ticStartNumber + 9}.
+      
+      Tic Data:
+      ${ticDataString}
           `,
         },
-      ];
+      ];      
   
       // Call the OpenAI API
       const completion = await openai.chat.completions.create({
@@ -146,7 +142,7 @@ exports.logTic = functions.https.onRequest(async (req: { headers: { authorizatio
       const adviceText = completion.choices?.[0]?.message?.content?.trim() ?? "";
       const adviceList = adviceText
         .split("\n")
-        .filter((item) => item && /^[0-9]+\./.test(item.trim())); // Ensure only numbered items are included
+        .filter((item: string) => item && /^[0-9]+\./.test(item.trim())); // Ensure only numbered items are included
       
 
       return adviceList; // Return the processed list of advice
