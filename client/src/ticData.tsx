@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "./firebase"; // Adjust paths as needed
-import { Chart } from "react-google-charts";
 import { ArrowUpDown } from "lucide-react";
+import * as d3 from "d3";
 import "./ticData.css"; // Import your CSS file here
 
 // Interfaces
@@ -55,6 +55,9 @@ const TicData: React.FC = () => {
   // CHART MODE
   const [chartModeIndex, setChartModeIndex] = useState<number>(0);
   const currentChartMode: ChartMode = chartModes[chartModeIndex];
+
+  // D3 chart container reference
+  const d3ChartRef = useRef<HTMLDivElement>(null);
 
   // ---- EFFECTS ----
   useEffect(() => {
@@ -296,10 +299,9 @@ const TicData: React.FC = () => {
     return map;
   }, [allLocationsInChart, myTics]);
 
-  // Final 2D array for Google Chart
+  // Final 2D array for chart export (CSV, etc.)
   const chartDataForGoogle = useMemo(() => {
     if (!chartRawData.length) return [["Time"]];
-
     const header = ["Time", ...allLocationsInChart];
     const rows = chartRawData.map((entry) => {
       const row = [entry.timeKey];
@@ -328,54 +330,248 @@ const TicData: React.FC = () => {
   const maxDataValue = findMaxValue(chartDataForGoogle);
   const chartMax = currentChartMode === "avg" ? 10 : Math.max(maxDataValue + 5, 5);
 
-  const chartOptions = {
-    curveType: "function",
-    legend: { position: "bottom" },
-    hAxis: {
-      slantedText: false,
-    },
-    vAxis: {
-      viewWindow: {
-        min: 0,
-        max: chartMax,
-      },
-    },
-    colors: allLocationsInChart.map((loc) => colorMap[loc]),
+  // ---- D3 CHART RENDERING ----
+  const drawChart = useCallback(() => {
+    if (!d3ChartRef.current) return;
+    // Clear previous chart contents
+    d3.select(d3ChartRef.current).selectAll("*").remove();
+
+    // Get container dimensions
+    const container = d3ChartRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const width = containerRect.width;
+    const height = containerRect.height;
+    const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    // Create the SVG element
+    const svg = d3
+      .select(container)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    // If no data is available, show a message
+    if (chartDataForGoogle.length <= 1) {
+      svg
+        .append("text")
+        .attr("x", width / 2)
+        .attr("y", height / 2)
+        .attr("text-anchor", "middle")
+        .text("No data available.");
+      return;
+    }
+
+    // Extract header and data rows
+    const header = chartDataForGoogle[0]; // e.g., ["Time", "loc1", "loc2", ...]
+    const dataRows = chartDataForGoogle.slice(1);
+
+    // Determine if grouping by time of day
+    const groupingByTimeOfDay = timeRangeFilter === "today";
+
+    // Build a data structure for each series
+    const seriesData: Record<string, { x: Date; y: number }[]> = {};
+    header.slice(1).forEach((loc) => {
+      seriesData[loc] = [];
+    });
+    dataRows.forEach((row) => {
+      let xValue: Date;
+      if (groupingByTimeOfDay) {
+        // Parse time-of-day using a fixed date (e.g., Jan 1, 2000)
+        xValue = new Date("2000-01-01 " + row[0]);
+      } else {
+        xValue = new Date(row[0]);
+      }
+      header.slice(1).forEach((loc, i) => {
+        const yValue = +row[i + 1];
+        seriesData[loc].push({ x: xValue, y: yValue });
+      });
+    });
+
+    // Compute x domain from all data points
+    const allX: Date[] = dataRows.map((row) =>
+      groupingByTimeOfDay ? new Date("2000-01-01 " + row[0]) : new Date(row[0])
+    );
+    const xExtent = d3.extent(allX) as [Date, Date];
+
+    // Create scales
+    const xScale = d3.scaleTime().domain(xExtent).range([0, innerWidth]);
+    const yScale = d3.scaleLinear().domain([0, chartMax]).range([innerHeight, 0]);
+
+    // Append group for chart content
+    const g = svg
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Create x-axis
+    const xAxis = d3
+      .axisBottom(xScale)
+      .ticks(6)
+      .tickFormat(
+        d3.timeFormat(groupingByTimeOfDay ? "%I:%M %p" : "%b %d") as (d: Date) => string
+      );
+    g.append("g")
+      .attr("transform", `translate(0, ${innerHeight})`)
+      .call(xAxis);
+
+    // Create y-axis
+    const yAxis = d3.axisLeft(yScale).ticks(5);
+    g.append("g").call(yAxis);
+
+    // Create line generator
+    const lineGenerator = d3
+      .line<{ x: Date; y: number }>()
+      .x((d) => xScale(d.x))
+      .y((d) => yScale(d.y))
+      .curve(d3.curveMonotoneX);
+
+    // Draw a line for each series
+    Object.keys(seriesData).forEach((loc) => {
+      g.append("path")
+        .datum(seriesData[loc])
+        .attr("fill", "none")
+        .attr("stroke", colorMap[loc] || "#000")
+        .attr("stroke-width", 2)
+        .attr("d", lineGenerator);
+    });
+
+    // Add legend at the bottom of the chart
+    const legend = svg.append("g").attr("class", "legend");
+    const legendData = header.slice(1);
+    const legendSpacing = 10;
+    let legendX = margin.left;
+    const legendY = height - margin.bottom + 30;
+
+    legendData.forEach((loc) => {
+      legend
+        .append("rect")
+        .attr("x", legendX)
+        .attr("y", legendY - 10)
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", colorMap[loc] || "#000");
+      legend
+        .append("text")
+        .attr("x", legendX + 15)
+        .attr("y", legendY)
+        .attr("dy", "-0.2em")
+        .attr("font-size", "12px")
+        .text(loc);
+      // Estimate text width and update legendX for the next item
+      const textWidth = (legend
+        .append("text")
+        .text(loc)
+        .node() as SVGTextElement).getComputedTextLength();
+      legendX += 15 + textWidth + legendSpacing;
+    });
+  }, [chartDataForGoogle, colorMap, chartMax, timeRangeFilter]);
+
+  // Redraw the chart when dependencies change and on window resize
+  useEffect(() => {
+    drawChart();
+    window.addEventListener("resize", drawChart);
+    return () => window.removeEventListener("resize", drawChart);
+  }, [drawChart]);
+
+  // ---- EXPORT FUNCTIONS ----
+
+  // Export the chart data as CSV
+  const exportCSV = () => {
+    if (chartDataForGoogle.length <= 1) return;
+    const csvContent = chartDataForGoogle.map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chart_data.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // Export the chart as an SVG file
+  const exportSVG = () => {
+    if (!d3ChartRef.current) return;
+    const svgElement = d3ChartRef.current.querySelector("svg");
+    if (!svgElement) return;
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgElement);
+    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "chart.svg";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // Export the chart as a PNG image
+  const exportPNG = () => {
+    if (!d3ChartRef.current) return;
+    const svgElement = d3ChartRef.current.querySelector("svg");
+    if (!svgElement) return;
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgElement);
+    const canvas = document.createElement("canvas");
+    // Use the SVG element's width and height attributes
+    const width = parseInt(svgElement.getAttribute("width") || "800", 10);
+    const height = parseInt(svgElement.getAttribute("height") || "400", 10);
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+    img.onload = () => {
+      ctx?.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const a = document.createElement("a");
+        a.download = "chart.png";
+        a.href = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+    };
+    img.src = url;
   };
 
   /**
- * Mobile-only sort button
- * - Hidden on screens above 768px
- * - Calls toggleSort() on click
- */
-const MobileSortButton: React.FC<{
-  onSortClick: () => void;
-  sortDirection: "asc" | "desc";
-}> = ({ onSortClick, sortDirection }) => {
-  return (
-    <div className="block md:hidden mb-4 text-right">
-      <button
-        onClick={onSortClick}
-        className="p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors duration-200"
-        title={`Sort by date (${
-          sortDirection === "desc" ? "newest first" : "oldest first"
-        })`}
-      >
-        Sort by Date
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="inline-block ml-2 h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+   * Mobile-only sort button
+   * - Hidden on screens above 768px
+   * - Calls toggleSort() on click
+   */
+  const MobileSortButton: React.FC<{
+    onSortClick: () => void;
+    sortDirection: "asc" | "desc";
+  }> = ({ onSortClick, sortDirection }) => {
+    return (
+      <div className="block md:hidden mb-4 text-right">
+        <button
+          onClick={onSortClick}
+          className="p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors duration-200"
+          title={`Sort by date (${
+            sortDirection === "desc" ? "newest first" : "oldest first"
+          })`}
         >
-          <path d="M7 7l3-3m0 0l3 3m-3-3v18" strokeWidth={2} />
-        </svg>
-      </button>
-    </div>
-  );
-};
-
+          Sort by Date
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="inline-block ml-2 h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path d="M7 7l3-3m0 0l3 3m-3-3v18" strokeWidth={2} />
+          </svg>
+        </button>
+      </div>
+    );
+  };
 
   // ---- RENDER ----
   return (
@@ -413,7 +609,9 @@ const MobileSortButton: React.FC<{
                 id="timeRange"
                 className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={timeRangeFilter}
-                onChange={(e) => setTimeRangeFilter(e.target.value as TimeRangeKey)}
+                onChange={(e) =>
+                  setTimeRangeFilter(e.target.value as TimeRangeKey)
+                }
               >
                 {Object.entries(timeRanges).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -546,21 +744,33 @@ const MobileSortButton: React.FC<{
                 </button>
               </div>
 
-              {/* Chart Container */}
-              <div className="w-full h-[400px] sm:h-[500px] overflow-hidden">
-                <Chart
-                  width="100%"
-                  height="100%"
-                  chartType="LineChart"
-                  loader={
-                    <div className="flex justify-center items-center h-full">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
-                    </div>
-                  }
-                  data={chartDataForGoogle}
-                  options={chartOptions}
-                />
+              {/* Export Buttons */}
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <button
+                  onClick={exportCSV}
+                  className="px-3 py-2 border rounded hover:bg-gray-100 transition-colors duration-200 text-sm"
+                >
+                  Export CSV
+                </button>
+                <button
+                  onClick={exportPNG}
+                  className="px-3 py-2 border rounded hover:bg-gray-100 transition-colors duration-200 text-sm"
+                >
+                  Export PNG
+                </button>
+                <button
+                  onClick={exportSVG}
+                  className="px-3 py-2 border rounded hover:bg-gray-100 transition-colors duration-200 text-sm"
+                >
+                  Export SVG
+                </button>
               </div>
+
+              {/* Chart Container */}
+              <div
+                ref={d3ChartRef}
+                className="w-full h-[400px] sm:h-[500px] overflow-hidden"
+              ></div>
             </motion.div>
 
             {/* TABLE CARD */}
