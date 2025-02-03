@@ -279,6 +279,7 @@ const LogNewTic = () => {
               onChange={(e) => setTimeOfDay(e.target.value)}
               className="w-full p-2 border rounded"
             >
+              <option value="All Day">All Day</option>
               <option value="Morning">Morning</option>
               <option value="Afternoon">Afternoon</option>
               <option value="Evening">Evening</option>
