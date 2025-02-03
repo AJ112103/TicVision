@@ -472,7 +472,7 @@ const Suggestions: React.FC = () => {
           {filteredData.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
-                No tic data available.
+                Log your tics to receive personalized suggestions based on your tic types and patterns.
               </CardContent>
             </Card>
           ) : (
