@@ -68,26 +68,31 @@ exports.logTic = functions.https.onRequest(async (req: { headers: { authorizatio
         // Retrieve the updated ticCounter
         const userDoc = await userRef.get();
         const ticCounter = userDoc.data()?.ticCounter;
+
+        console.log("sending data to chatGPT");
   
         // Trigger ChatGPT advice logic if ticCounter is 10, 20, or 30
-        if ([10, 20, 30].includes(ticCounter)) {
-          const ticHistorySnapshot = await db
-            .collection("users")
-            .doc(userId)
-            .collection("ticHistory")
-            .get();
-  
-          const ticHistory = ticHistorySnapshot.docs.map((doc: { data: () => any; }) => doc.data());
-  
-          const advice = await getAdviceFromChatGPT(ticHistory);
-  
-          // Store the advice in the user's Firestore document
-          await userRef.collection("advice").add({
-            advice,
-            ticCounter,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
+        // Trigger ChatGPT advice logic if ticCounter is 10, 20, or 30
+          if ([10, 20, 30].includes(ticCounter)) {
+            const ticHistorySnapshot = await db
+              .collection("users")
+              .doc(userId)
+              .collection("ticHistory")
+              .get();
+
+            const ticHistory = ticHistorySnapshot.docs.map((doc: { data: () => any }) => doc.data());
+
+            // Pass the current ticCounter as the starting point
+            const advice = await getAdviceFromChatGPT(ticHistory, ticCounter);
+
+            // Store the advice in the user's Firestore document
+            await userRef.collection("advice").add({
+              advice,
+              ticCounter,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+
   
         return res.status(200).send({ success: true });
       } catch (error) {
@@ -97,54 +102,58 @@ exports.logTic = functions.https.onRequest(async (req: { headers: { authorizatio
     });
   });
 
-const getAdviceFromChatGPT = async (ticHistory: any[]) => {
-  try {
-    const openai = new OpenAI({
-    apiKey: functions.config().openai.api_key, // Access the API key securely
-    });
-    const ticDataString = ticHistory
-      .map(
-        (tic) =>
-          `Date: ${tic.date}, Time of Day: ${tic.timeOfDay}, Location: ${tic.location}, Intensity: ${tic.intensity}, Latitude: ${tic.latitude || "N/A"}, Longitude: ${tic.longitude || "N/A"}`
-      )
-      .join("\n");
-
-    // Define the messages for the ChatGPT conversation
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      {
-        role: "user",
-        content: `
-Based on the following tic data, provide 10 pieces of actionable advice to help manage or understand the user's tics. 
-Make the advice specific to patterns, intensity, and frequency observed in the data.
-
-Tic Data:
-${ticDataString}
-
-Please output 10 pieces of advice as a numbered list.
-        `,
-      },
-    ];
-
-    // Call the OpenAI API
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Use "gpt-4" or "gpt-3.5-turbo"
-      messages: messages,
-      max_tokens: 800,
-      temperature: 0.7, // Adjust the creativity of the responses
-    });
-
-    // Extract and process the response
-    const adviceText = completion.choices?.[0]?.message?.content?.trim() ?? "";
-    const adviceList = adviceText.split("\n").filter((item) => item);
-
-    return adviceList; // Return the processed list of advice
-  } catch (error) {
-    console.error("Error calling ChatGPT API:", error);
-    throw new Error("Failed to get advice from ChatGPT");
-  }
-};
-
-
+  const getAdviceFromChatGPT = async (ticHistory: any[], ticStartNumber: number) => {
+    try {
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY, // Access the API key securely
+      });
   
+      const ticDataString = ticHistory
+        .map(
+          (tic) =>
+            `Date: ${tic.date}, Time of Day: ${tic.timeOfDay}, Location: ${tic.location}, Intensity: ${tic.intensity}}`
+        )
+        .join("\n");
+  
+      // Define the messages for the ChatGPT conversation
+      const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+        {
+          role: "user",
+          content: `
+  Based on the following tic data, provide 10 pieces of actionable advice to help manage or understand the user's tics.
+  The advice should be numbered sequentially, starting from ${ticStartNumber} to ${ticStartNumber + 9}.
+  Make the advice specific to patterns, intensity, and frequency observed in the data.
+  
+  Tic Data:
+  ${ticDataString}
+  
+  Please ensure that the list strictly begins at ${ticStartNumber} and ends at ${ticStartNumber + 9}, and each piece of advice is concise.
 
+  Only send a numbered list, nothing else.
+          `,
+        },
+      ];
+  
+      // Call the OpenAI API
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4", // Use "gpt-4" or "gpt-3.5-turbo"
+        messages: messages,
+        max_tokens: 800,
+        temperature: 0.7, // Adjust the creativity of the responses
+      });
+  
+      console.log("recieved: " + completion);
+      const adviceText = completion.choices?.[0]?.message?.content?.trim() ?? "";
+      const adviceList = adviceText
+        .split("\n")
+        .filter((item) => item && /^[0-9]+\./.test(item.trim())); // Ensure only numbered items are included
+      
+
+      return adviceList; // Return the processed list of advice
+    } catch (error) {
+      console.error("Error calling ChatGPT API:", error);
+      throw new Error("Failed to get advice from ChatGPT");
+    }
+  };
+  
   

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Switch from "react-switch";
+import { getAuth } from "firebase/auth";
+
 import armIcon from "./assets/arm-icon.svg";
 import backIcon from "./assets/back-icon.svg";
 import breathingIcon from "./assets/breathing-icon.svg";
@@ -13,7 +15,14 @@ import phraseIcon from "./assets/phrase-icon.svg";
 import shoulderIcon from "./assets/shoulder-icon.svg";
 import stomachIcon from "./assets/stomach-icon.svg";
 import simpleIcon from "./assets/simple-icon.svg";
-import { getAuth } from "firebase/auth";
+import echolaliaIcon from "./assets/echolalia-icon.svg";
+import coprolaliaIcon from "./assets/coprolalia-icon.svg";
+import animalsoundIcon from "./assets/animal-sounds-icon.svg";
+import chestIcon from "./assets/chest-icon.svg";
+import headIcon from "./assets/head-icon.svg";
+import pelvisIcon from "./assets/pelvis-icon.svg";
+import handIcon from "./assets/hand-icon.svg";
+import footIcon from "./assets/foot-icon.svg";
 
 const ticTypes = [
   { id: "1", name: "Arm", tag: "motor", icon: armIcon },
@@ -26,8 +35,16 @@ const ticTypes = [
   { id: "8", name: "Shoulder", tag: "motor", icon: shoulderIcon },
   { id: "9", name: "Simple Vocal", tag: "vocal", icon: simpleIcon },
   { id: "10", name: "Stomach", tag: "motor", icon: stomachIcon },
-  { id: "11", name: "Word Phrase", tag: "vocal", icon: phraseIcon },
+  { id: "11", name: "Palilalia", tag: "vocal", icon: phraseIcon },
   { id: "12", name: "Breathing", tag: "motor", icon: breathingIcon },
+  { id: "13", name: "Echolalia", tag: "vocal", icon: echolaliaIcon },
+  { id: "14", name: "Coprolalia", tag: "vocal", icon: coprolaliaIcon },
+  { id: "15", name: "Animal Sound", tag: "vocal", icon: animalsoundIcon },
+  { id: "16", name: "Chest", tag: "motor", icon: chestIcon },
+  { id: "17", name: "Head", tag: "motor", icon: headIcon },
+  { id: "18", name: "Pelvis", tag: "motor", icon: pelvisIcon },
+  { id: "19", name: "Hand", tag: "motor", icon: handIcon },
+  { id: "20", name: "Foot", tag: "motor", icon: footIcon },
 ];
 
 const Loading = () => (
