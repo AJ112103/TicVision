@@ -27,7 +27,7 @@ const Index = () => {
   const journeyFeatures = [
     { icon: <Target size={24} className="text-white" />, text: "Track your progress over time." },
     { icon: <Target size={24} className="text-white" />, text: "Gain insights into your tics and triggers." },
-    { icon: <Target size={36} className="text-white" />, text: "Enjoy a supportive community and personalized recommendations." }
+    { icon: <Target size={24} className="text-white" />, text: "Enjoy personalized recommendations." }
   ];
 
   return (
