@@ -1,18 +1,17 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { motion } from "framer-motion";
 import brainIcon from "./assets/brain-icon.svg";
 import lightbulbIcon from "./assets/lightbulb-icon.svg";
 import graphIcon from "./assets/graph-icon.svg";
 import educationIcon from "./assets/education-icon.svg";
 import { Target } from "lucide-react";
-import { ReactNode } from "react";
 
 interface MotionCardProps {
   children: ReactNode;
   delay: number;
 }
 
-const MotionCard = ({ children}: MotionCardProps) => (
+const MotionCard = ({ children }: MotionCardProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -26,9 +25,9 @@ const MotionCard = ({ children}: MotionCardProps) => (
 
 const Index = () => {
   const journeyFeatures = [
-    { icon: <Target className="h-6 w-6 text-white" />, text: "Track your progress over time." },
-    { icon: <Target className="h-6 w-6 text-white" />, text: "Gain insights into your tics and triggers." },
-    { icon: <Target className="h-6 w-6 text-white" />, text: "Enjoy a supportive community and personalized recommendations." }
+    { icon: <Target size={24} className="text-white" />, text: "Track your progress over time." },
+    { icon: <Target size={24} className="text-white" />, text: "Gain insights into your tics and triggers." },
+    { icon: <Target size={36} className="text-white" />, text: "Enjoy a supportive community and personalized recommendations." }
   ];
 
   return (
