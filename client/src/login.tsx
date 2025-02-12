@@ -132,7 +132,7 @@ const Login: React.FC = () => {
               className="w-full p-2 border rounded-md mb-4"
             />
             <motion.button
-              className="w-full bg-[#256472] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#3a7a8b] transition-colors"
+              className="w-full bg-[#256472] text-white font-semibold px-4 py-2 rounded-md hover:bg-[rgb(38,83,93)] transition-colors"
               onClick={handleForgotPassword}
             >
               Send Reset Link
@@ -171,7 +171,7 @@ const Login: React.FC = () => {
             />
 
             <motion.button
-              className="w-full bg-[#256472] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#3a7a8b] transition-colors"
+              className="w-full bg-[#256472] text-white font-semibold px-4 py-2 rounded-md hover:bg-[rgb(38,83,93)] transition-colors"
               onClick={handleEmailAuth}
             >
               {isSignUp ? "Sign Up" : "Sign In"}
@@ -195,7 +195,7 @@ const Login: React.FC = () => {
               <>
                 <div className="my-4 text-gray-500">OR</div>
                 <motion.button
-                  className="flex items-center justify-center w-full bg-[#4285F4] text-white font-semibold px-4 py-2 rounded-md hover:bg-[#357ae8] transition-colors"
+                  className="flex items-center justify-center w-full bg-[#256472] text-white font-semibold px-4 py-2 rounded-md hover:bg-[rgb(38,83,93)] transition-colors"
                   onClick={handleGoogleLogin}
                 >
                   <img
