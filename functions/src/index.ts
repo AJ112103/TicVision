@@ -151,5 +151,3 @@ exports.logTic = functions.https.onRequest(async (req: { headers: { authorizatio
       throw new Error("Failed to get advice from ChatGPT");
     }
   };
-  
-  
