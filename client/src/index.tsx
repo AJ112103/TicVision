@@ -31,19 +31,18 @@ const Index = () => {
   ];
 
   return (
-    <div className="bg-[#4a90a1] text-white min-h-screen flex flex-col items-center py-8 px-4 md:px-8">
+    <div className="bg-[#c6e8f0] text-white min-h-screen flex flex-col items-center py-8 px-4 md:px-8">
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-[#4a90a1] text-white text-center px-6 py-4 rounded-lg max-w-md mb-8"
+        className="bg-[#4a90a1] text-white text-center p-6 rounded-3xl max-w-md md:p-8 mb-8"
       >
-        <div className="bg-[#256472] rounded-3xl p-6 md:p-8 shadow-lg">
           <p className="text-m md:text-base">
             <strong>TicVision</strong> empowers individuals with <strong>Tourette's Syndrome</strong> and their caregivers by combining <strong>advanced tools</strong> and <strong>insights</strong> to make tic management <strong>easier than ever</strong>.
           </p>
-        </div>
+
       </motion.div>
 
       {/* Features Grid */}
@@ -85,7 +84,7 @@ const Index = () => {
         transition={{ duration: 0.6, delay: 1.2 }}
         className="text-center max-w-2xl"
       >
-        <h2 className="text-xl mt-8 md:text-2xl font-bold">
+        <h2 className="text-xl text-[#4a90a1] mt-8 md:text-2xl font-bold">
           Start Your Journey with TicVision Today
         </h2>
       </motion.div>
@@ -120,7 +119,7 @@ const Index = () => {
         transition={{ duration: 0.6, delay: 1.2 }}
         className="text-center max-w-2xl"
       >
-        <h2 className="text-xl md:text-2xl font-bold mb-4">
+        <h2 className="text-xl text-[#4a90a1] md:text-2xl font-bold mb-4">
           Understand Your Tics, Visualise Your Progress.
         </h2>
       </motion.div>

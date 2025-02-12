@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const cors = require("cors")({ origin: "*" }); // Replace with your production frontend URL
+const cors = require("cors")({ origin: (origin: any, callback: any) => (["https://www.ticvision.io/", "https://tic-vision-y6v6-git-feature-ml-recs-aj112103s-projects.vercel.app?_vercel_share=lwuu8eOoXY6w4IMHj7xtWkCQucbihahP"].includes(origin) || !origin ? callback(null, true) : callback(new Error("Not allowed by CORS"))) });
 
 import OpenAI from "openai";
 

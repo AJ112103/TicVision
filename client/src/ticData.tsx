@@ -379,7 +379,7 @@ const MobileSortButton: React.FC<{
 
   // ---- RENDER ----
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
+    <div className="bg-[#c6e8f0] min-h-screen py-8">
       <motion.div
         className="container mx-auto max-w-screen-xl w-full overflow-auto px-4"
         initial={{ opacity: 0 }}
@@ -388,7 +388,7 @@ const MobileSortButton: React.FC<{
       >
         {/* TITLE */}
         <motion.h2
-          className="text-3xl sm:text-4xl font-bold mb-6"
+          className="text-3xl text-[#4a90a1] sm:text-4xl font-bold mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
