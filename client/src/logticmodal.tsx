@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
 import { auth } from "./firebase";
 import { useNavigate } from "react-router-dom";
 
@@ -26,7 +26,18 @@ import pelvisIcon from "./assets/pelvis-icon.svg";
 import handIcon from "./assets/hand-icon.svg";
 import footIcon from "./assets/foot-icon.svg";
 
-const ticTypes = [
+interface TicType {
+  id: string;
+  name: string;
+  tag: "motor" | "vocal";
+  icon: string;
+}
+
+interface TicWithCount extends TicType {
+  count: number;
+}
+
+const ticTypes: TicType[] = [
   { id: "1", name: "Arm", tag: "motor", icon: armIcon },
   { id: "2", name: "Back", tag: "motor", icon: backIcon },
   { id: "3", name: "Eye", tag: "motor", icon: eyeIcon },
@@ -53,13 +64,13 @@ const filterSections = ["My Tics", "Vocal", "Motor", "All"];
 
 const LogTicModal = () => {
   const [currentSection, setCurrentSection] = useState(0);
-  const [filteredTics, setFilteredTics] = useState([]);
-  const [myTics, setMyTics] = useState([]);
+  const [filteredTics, setFilteredTics] = useState<TicType[]>([]);
+  const [myTics, setMyTics] = useState<TicWithCount[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const db = getFirestore();
 
-  const handleTileClick = (ticName) => {
+  const handleTileClick = (ticName: string) => {
     navigate(`/logtic/${ticName.replace(/\s+/g, "-").toLowerCase()}`);
   };
 
@@ -70,13 +81,21 @@ const LogTicModal = () => {
     setLoading(true);
     try {
       const snapshot = await getDocs(collection(db, "users", userId, "mytics"));
-      const tics = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name,
-        count: doc.data().count,
-        ...ticTypes.find((tic) => tic.name.toLowerCase() === doc.data().name.toLowerCase()),
-      }));
-      setMyTics(tics.filter(Boolean));
+      const tics = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const foundTic = ticTypes.find(
+          (tic) => tic.name.toLowerCase() === data.name.toLowerCase()
+        );
+        if (foundTic) {
+          return {
+            count: data.count,
+            ...foundTic,
+            id: doc.id,
+          };
+        }
+        return null;
+      });
+      setMyTics(tics.filter(Boolean) as TicWithCount[]);
     } catch (error) {
       console.error("Error fetching tics:", error);
     } finally {
@@ -91,7 +110,7 @@ const LogTicModal = () => {
   useEffect(() => {
     switch (filterSections[currentSection]) {
       case "My Tics":
-        setFilteredTics(myTics);
+        setFilteredTics(myTics.length > 0 ? myTics : ticTypes);
         break;
       case "Vocal":
         setFilteredTics(ticTypes.filter((tic) => tic.tag === "vocal"));
@@ -108,8 +127,10 @@ const LogTicModal = () => {
   }, [currentSection, myTics]);
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1)),
-    onSwipedRight: () => setCurrentSection((prev) => Math.max(prev - 1, 0)),
+    onSwipedLeft: () =>
+      setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1)),
+    onSwipedRight: () =>
+      setCurrentSection((prev) => Math.max(prev - 1, 0)),
   });
 
   return (
@@ -126,9 +147,15 @@ const LogTicModal = () => {
         >
           {"<"}
         </button>
-        <h4 className="text-lg font-bold text-[#256472]">{filterSections[currentSection]}</h4>
+        <h4 className="text-lg font-bold text-[#256472]">
+          {filterSections[currentSection]}
+        </h4>
         <button
-          onClick={() => setCurrentSection((prev) => Math.min(prev + 1, filterSections.length - 1))}
+          onClick={() =>
+            setCurrentSection((prev) =>
+              Math.min(prev + 1, filterSections.length - 1)
+            )
+          }
           className="text-[#256472] px-2"
           disabled={currentSection === filterSections.length - 1}
         >
@@ -147,7 +174,7 @@ const LogTicModal = () => {
             <button
               key={tic.id}
               onClick={() => handleTileClick(tic.name)}
-              className="flex flex-col items-center justify-center p-4 bg-[#256472] text-[#C1E4EC] rounded-lg hover:bg-[#3c7a8b] w-[120px] border border-gray-700 "
+              className="flex flex-col items-center justify-center p-4 bg-[#256472] text-[#C1E4EC] rounded-lg hover:bg-[#3c7a8b] w-[120px] border border-gray-700"
             >
               <img src={tic.icon} alt={tic.name} className="w-12 h-12 mb-2" />
               <span className="text-sm font-medium">{tic.name}</span>

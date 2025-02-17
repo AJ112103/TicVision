@@ -1,17 +1,16 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs } from "firebase/firestore";
-import { auth, db } from "./firebase"; // Adjust paths as needed
-import { Chart } from "react-google-charts";
-import { ArrowUpDown } from "lucide-react";
-import "./ticData.css"; // Import your CSS file here
+import { auth, db } from "./firebase"; // Adjust the path as needed
+import TicFilters, { timeRanges, TimeRangeKey } from "./components/TicFilters";
+import TicChart from "./components/TicChart";
+import TicTable, { TicData as TicDataType } from "./components/TicTable";
 
-// Interfaces
 interface TicData {
   timeOfDay: string;
   date: string;
   intensity: number;
-  location: string; // We'll treat 'location' as the 'tic name' here
+  location: string;
 }
 
 interface MyTic {
@@ -22,24 +21,9 @@ interface MyTic {
 
 // Chart modes
 const chartModes = ["avg", "total", "count"] as const;
-type ChartMode = (typeof chartModes)[number];
-
-// Time Range Keys
-const timeRanges = {
-  all: "All Time",
-  today: "Today",
-  lastWeek: "Last Week",
-  lastMonth: "Last Month",
-  last3Months: "Last 3 Months",
-  last6Months: "Last 6 Months",
-  lastYear: "Last Year",
-  specificDate: "Specific Date",
-} as const;
-
-type TimeRangeKey = keyof typeof timeRanges;
+type ChartMode = "avg" | "total" | "count";
 
 const TicData: React.FC = () => {
-  // ---- STATES ----
   const [ticData, setTicData] = useState<TicData[]>([]);
   const [myTics, setMyTics] = useState<MyTic[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -48,29 +32,24 @@ const TicData: React.FC = () => {
   const [timeRangeFilter, setTimeRangeFilter] = useState<TimeRangeKey>("all");
   const [specificDate, setSpecificDate] = useState<string>("");
   const [locationFilter, setLocationFilter] = useState<string[]>([]);
-
-  // SORT DIRECTION FOR TABLE
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   // CHART MODE
   const [chartModeIndex, setChartModeIndex] = useState<number>(0);
   const currentChartMode: ChartMode = chartModes[chartModeIndex];
 
-  // ---- EFFECTS ----
+  // Data Fetching
   useEffect(() => {
     fetchData();
   }, []);
 
-  // ---- DATA FETCH ----
   const fetchData = async () => {
     const user = auth.currentUser;
     if (!user) {
       console.error("No authenticated user found.");
       return;
     }
-
     setLoading(true);
-
     try {
       // 1) Fetch ticHistory
       const historyCollection = collection(db, "users", user.uid, "ticHistory");
@@ -160,15 +139,14 @@ const TicData: React.FC = () => {
     return data;
   }, [ticData, timeRangeFilter, specificDate, locationFilter, sortDirection]);
 
-  // Distinct locations
+  // Distinct locations for filters
   const uniqueLocations = useMemo(() => {
     return Array.from(new Set(ticData.map((t) => t.location)));
   }, [ticData]);
 
   // Table sort toggle
   const toggleSort = () => {
-    const newDirection = sortDirection === "desc" ? "asc" : "desc";
-    setSortDirection(newDirection);
+    setSortDirection(sortDirection === "desc" ? "asc" : "desc");
   };
 
   // Reset filters
@@ -179,33 +157,11 @@ const TicData: React.FC = () => {
     setSortDirection("desc");
   };
 
-  // Toggle location
-  const toggleLocation = (location: string) => {
+  // Toggle location filter
+  const toggleLocation = (loc: string) => {
     setLocationFilter((prev) =>
-      prev.includes(location)
-        ? prev.filter((loc) => loc !== location)
-        : [...prev, location]
+      prev.includes(loc) ? prev.filter((x) => x !== loc) : [...prev, loc]
     );
-  };
-
-  // Chart mode switch
-  const renderModeLabel = (mode: ChartMode) => {
-    switch (mode) {
-      case "avg":
-        return "Average Intensity";
-      case "total":
-        return "Total Intensity";
-      case "count":
-        return "Number of Tics";
-    }
-  };
-
-  const prevMode = () => {
-    setChartModeIndex((prev) => (prev + chartModes.length - 1) % chartModes.length);
-  };
-
-  const nextMode = () => {
-    setChartModeIndex((prev) => (prev + 1) % chartModes.length);
   };
 
   // ---- CHART DATA PROCESSING ----
@@ -244,15 +200,13 @@ const TicData: React.FC = () => {
       return row;
     });
 
-    // Sort by date or timeOfDay
+    // Sort by time (for "today" use time of day; otherwise by date)
     result.sort((a, b) => {
-      if (groupingByTimeOfDay) {
-        // Sort by time of day
+      if (timeRangeFilter === "today") {
         const timeA = new Date(`2000-01-01 ${a.timeKey}`).getTime();
         const timeB = new Date(`2000-01-01 ${b.timeKey}`).getTime();
         return timeA - timeB;
       } else {
-        // Sort by actual date
         const dateA = new Date(a.timeKey as string).getTime();
         const dateB = new Date(b.timeKey as string).getTime();
         return dateA - dateB;
@@ -262,11 +216,13 @@ const TicData: React.FC = () => {
     return result;
   };
 
-  const chartRawData = useMemo(() => {
-    return processChartData(filteredData);
-  }, [filteredData, currentChartMode, timeRangeFilter]);
+  const chartRawData = useMemo(() => processChartData(filteredData), [
+    filteredData,
+    currentChartMode,
+    timeRangeFilter,
+  ]);
 
-  // Build chart header => ["Time", location1, location2, ...]
+  // Build header for chart (e.g. ["Time", "Location1", "Location2", ...])
   const allLocationsInChart = useMemo(() => {
     const setLoc = new Set<string>();
     chartRawData.forEach((row) => {
@@ -277,12 +233,13 @@ const TicData: React.FC = () => {
     return Array.from(setLoc);
   }, [chartRawData]);
 
-  // Assign colors
+  // Assign colors to each location
   const colorMap = useMemo(() => {
     const map: Record<string, string> = {};
     const randomColor = () =>
-      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
-
+      `#${Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, "0")}`;
     allLocationsInChart.forEach((loc) => {
       const matchedTic = myTics.find((t) => t.name === loc);
       if (matchedTic) {
@@ -299,7 +256,6 @@ const TicData: React.FC = () => {
   // Final 2D array for Google Chart
   const chartDataForGoogle = useMemo(() => {
     if (!chartRawData.length) return [["Time"]];
-
     const header = ["Time", ...allLocationsInChart];
     const rows = chartRawData.map((entry) => {
       const row = [entry.timeKey];
@@ -311,7 +267,7 @@ const TicData: React.FC = () => {
     return [header, ...rows];
   }, [chartRawData, allLocationsInChart]);
 
-  // Find max data value for Y-axis limit
+  // Find max data value (for setting Y-axis limit)
   const findMaxValue = (data: any[][]) => {
     let maxVal = 0;
     for (let i = 1; i < data.length; i++) {
@@ -331,53 +287,30 @@ const TicData: React.FC = () => {
   const chartOptions = {
     curveType: "function",
     legend: { position: "bottom" },
-    hAxis: {
-      slantedText: false,
-    },
-    vAxis: {
-      viewWindow: {
-        min: 0,
-        max: chartMax,
-      },
-    },
+    hAxis: { slantedText: false },
+    vAxis: { viewWindow: { min: 0, max: chartMax } },
     colors: allLocationsInChart.map((loc) => colorMap[loc]),
   };
 
-  /**
- * Mobile-only sort button
- * - Hidden on screens above 768px
- * - Calls toggleSort() on click
- */
-const MobileSortButton: React.FC<{
-  onSortClick: () => void;
-  sortDirection: "asc" | "desc";
-}> = ({ onSortClick, sortDirection }) => {
-  return (
-    <div className="block md:hidden mb-4 text-right">
-      <button
-        onClick={onSortClick}
-        className="p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors duration-200"
-        title={`Sort by date (${
-          sortDirection === "desc" ? "newest first" : "oldest first"
-        })`}
-      >
-        Sort by Date
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="inline-block ml-2 h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path d="M7 7l3-3m0 0l3 3m-3-3v18" strokeWidth={2} />
-        </svg>
-      </button>
-    </div>
-  );
-};
+  const renderModeLabel = (mode: ChartMode) => {
+    switch (mode) {
+      case "avg":
+        return "Average Intensity";
+      case "total":
+        return "Total Intensity";
+      case "count":
+        return "Number of Tics";
+    }
+  };
 
+  const prevMode = () => {
+    setChartModeIndex((prev) => (prev + chartModes.length - 1) % chartModes.length);
+  };
 
-  // ---- RENDER ----
+  const nextMode = () => {
+    setChartModeIndex((prev) => (prev + 1) % chartModes.length);
+  };
+
   return (
     <div className="bg-[#c6e8f0] min-h-screen py-8">
       <motion.div
@@ -396,96 +329,16 @@ const MobileSortButton: React.FC<{
         </motion.h2>
 
         {/* FILTERS */}
-        <motion.div
-          className="bg-white rounded shadow p-4 mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h3 className="text-xl mb-4 font-semibold">Filters</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* Time Range Filter */}
-            <div>
-              <label className="block text-sm font-medium mb-1" htmlFor="timeRange">
-                Time Range
-              </label>
-              <select
-                id="timeRange"
-                className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                value={timeRangeFilter}
-                onChange={(e) => setTimeRangeFilter(e.target.value as TimeRangeKey)}
-              >
-                {Object.entries(timeRanges).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Specific Date Picker */}
-            {timeRangeFilter === "specificDate" && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <label
-                  className="block text-sm font-medium mb-1"
-                  htmlFor="specificDate"
-                >
-                  Select Date
-                </label>
-                <input
-                  type="date"
-                  id="specificDate"
-                  className="border rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  value={specificDate}
-                  onChange={(e) => setSpecificDate(e.target.value)}
-                />
-              </motion.div>
-            )}
-
-            {/* Location Filter (Tic Types) */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Tic Types
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {uniqueLocations.map((loc, index) => {
-                  const isSelected = locationFilter.includes(loc);
-                  return (
-                    <motion.button
-                      key={loc}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      type="button"
-                      onClick={() => toggleLocation(loc)}
-                      className={`px-3 py-1 rounded-full border text-sm transition-colors duration-200 ${
-                        isSelected
-                          ? "bg-primary text-white border-primary"
-                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                      }`}
-                    >
-                      {loc}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-gray-100 hover:bg-gray-200 transition-colors duration-200 rounded px-3 py-2 text-sm"
-            onClick={handleResetFilters}
-          >
-            Reset Filters
-          </motion.button>
-        </motion.div>
+        <TicFilters
+          timeRangeFilter={timeRangeFilter}
+          setTimeRangeFilter={setTimeRangeFilter}
+          specificDate={specificDate}
+          setSpecificDate={setSpecificDate}
+          locationFilter={locationFilter}
+          toggleLocation={toggleLocation}
+          uniqueLocations={uniqueLocations}
+          handleResetFilters={handleResetFilters}
+        />
 
         {/* LOADING SPINNER */}
         {loading && (
@@ -501,143 +354,19 @@ const MobileSortButton: React.FC<{
         {/* CHART + TABLE */}
         {!loading && (
           <>
-            {/* CHART CARD */}
-            <motion.div
-              className="bg-white rounded shadow p-4 mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              {/* Chart Mode Switcher */}
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <button
-                  onClick={prevMode}
-                  className="p-2 hover:bg-gray-100 rounded transition-colors duration-200"
-                >
-                  {/* Left Arrow */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M15 19l-7-7 7-7" strokeWidth={2} />
-                  </svg>
-                </button>
-
-                <h2 className="text-xl font-bold text-gray-900">
-                  {renderModeLabel(currentChartMode)}
-                </h2>
-
-                <button
-                  onClick={nextMode}
-                  className="p-2 hover:bg-gray-100 rounded transition-colors duration-200"
-                >
-                  {/* Right Arrow */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path d="M9 5l7 7-7 7" strokeWidth={2} />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Chart Container */}
-              <div className="w-full h-[400px] sm:h-[500px] overflow-hidden">
-                <Chart
-                  width="100%"
-                  height="100%"
-                  chartType="LineChart"
-                  loader={
-                    <div className="flex justify-center items-center h-full">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-gray-500"></div>
-                    </div>
-                  }
-                  data={chartDataForGoogle}
-                  options={chartOptions}
-                />
-              </div>
-            </motion.div>
-
-            {/* TABLE CARD */}
-            <motion.div
-              className="bg-white rounded shadow p-4 mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <h3 className="text-xl mb-4 font-semibold">Tic Data Table</h3>
-
-              {/* Mobile Sort Button */}
-              <MobileSortButton
-                onSortClick={toggleSort}         // use your existing toggleSort
-                sortDirection={sortDirection}    // pass in the current sort direction
-              />
-
-              {/* Table Container */}
-              <div className="overflow-x-auto">
-                {/* Add the .tic-table class to apply our custom CSS */}
-                <table className="tic-table min-w-full bg-white rounded-lg overflow-hidden border">
-                  <thead className="bg-primary text-white">
-                    <tr>
-                      <th className="py-3 px-6 text-left">
-                        <div className="flex items-center gap-2">
-                          Date
-                          <button
-                            onClick={toggleSort}
-                            className="p-1 rounded hover:bg-primary/50 transition-colors duration-200"
-                            title={`Sort by date (${
-                              sortDirection === "desc"
-                                ? "newest first"
-                                : "oldest first"
-                            })`}
-                          >
-                            <ArrowUpDown size={16} />
-                          </button>
-                        </div>
-                      </th>
-                      <th className="py-3 px-6 text-left">Time of Day</th>
-                      <th className="py-3 px-6 text-left">Location (Tic)</th>
-                      <th className="py-3 px-6 text-left">Intensity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="text-center py-4">
-                          No data available.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredData.map((tic, index) => (
-                        <tr
-                          key={index}
-                          className={
-                            index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                          }
-                        >
-                          <td data-label="Date" className="py-3 px-6">
-                            {new Date(tic.date).toLocaleDateString()}
-                          </td>
-                          <td data-label="Time of Day" className="py-3 px-6">
-                            {tic.timeOfDay}
-                          </td>
-                          <td data-label="Location (Tic)" className="py-3 px-6">
-                            {tic.location}
-                          </td>
-                          <td data-label="Intensity" className="py-3 px-6">
-                            {tic.intensity}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
+            <TicChart
+              chartDataForGoogle={chartDataForGoogle}
+              chartOptions={chartOptions}
+              currentChartMode={currentChartMode}
+              prevMode={prevMode}
+              nextMode={nextMode}
+              renderModeLabel={renderModeLabel}
+            />
+            <TicTable
+              filteredData={filteredData}
+              sortDirection={sortDirection}
+              toggleSort={toggleSort}
+            />
           </>
         )}
       </motion.div>

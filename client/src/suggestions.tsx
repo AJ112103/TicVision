@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { collection, getDocs } from 'firebase/firestore';
 import { auth, db } from './firebase';
-import { Brain, Filter, RefreshCcw, Calendar, MapPin } from 'lucide-react';
+import {
+  Brain,
+  Filter,
+  RefreshCcw,
+  Calendar,
+  MapPin,
+} from 'lucide-react';
 
 interface TicData {
   timeOfDay: string;
@@ -11,16 +17,24 @@ interface TicData {
   location: string;
 }
 
-const Card = ({ className = "", children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const Card = ({
+  className = '',
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={`rounded-lg border bg-white shadow-sm p-6 ${className}`}
+    className={`rounded-lg border border-[#C1E4EC] bg-white shadow-sm p-6 ${className}`}
     {...props}
   >
     {children}
   </div>
 );
 
-const CardHeader = ({ className = "", children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const CardHeader = ({
+  className = '',
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={`flex flex-col space-y-1.5 mb-4 ${className}`}
     {...props}
@@ -29,16 +43,24 @@ const CardHeader = ({ className = "", children, ...props }: React.HTMLAttributes
   </div>
 );
 
-const CardTitle = ({ className = "", children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+const CardTitle = ({
+  className = '',
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) => (
   <h3
-    className={`text-2xl font-semibold leading-none tracking-tight ${className}`}
+    className={`text-2xl font-semibold leading-none tracking-tight text-[#256472] ${className}`}
     {...props}
   >
     {children}
   </h3>
 );
 
-const CardContent = ({ className = "", children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const CardContent = ({
+  className = '',
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={className} {...props}>
     {children}
   </div>
@@ -144,9 +166,7 @@ function mapLocationToCategory(location: string): string | undefined {
 }
 
 /**
- * Updated suggestionsMap:
- * The keys now exactly match the categories returned by mapLocationToCategory,
- * ensuring that every suggestion is linked to the specific tic type.
+ * Updated suggestionsMap: The keys now exactly match the categories returned by mapLocationToCategory.
  */
 const suggestionsMap: { [key: string]: string[] } = {
   'Vocal Simple': [
@@ -339,176 +359,179 @@ const Suggestions: React.FC = () => {
   ).filter(Boolean) as string[];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="p-6 max-w-4xl mx-auto"
-    >
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex items-center gap-2 mb-6"
-      >
-        <Brain className="w-8 h-8 text-bg-primary" />
-        <h2 className="text-3xl font-bold">Tic Suggestions</h2>
-      </motion.div>
-
-      {/* Filters Card */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Time Range Filter */}
-            <div>
-              <label className="block text-sm font-medium mb-2" htmlFor="timeRange">
-                <Calendar className="w-4 h-4 inline-block mr-2" />
-                Time Range
-              </label>
-              <select
-                id="timeRange"
-                className="w-full rounded-md border border-gray-300 p-2"
-                value={timeRangeFilter}
-                onChange={e => setTimeRangeFilter(e.target.value)}
-              >
-                <option value="all">All Time</option>
-                <option value="today">Today</option>
-                <option value="lastWeek">Last Week</option>
-                <option value="lastMonth">Last Month</option>
-                <option value="last3Months">Last 3 Months</option>
-                <option value="last6Months">Last 6 Months</option>
-                <option value="lastYear">Last Year</option>
-                <option value="specificDate">Specific Date</option>
-              </select>
-            </div>
-
-            {/* Specific Date Filter */}
-            {timeRangeFilter === 'specificDate' && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <label className="block text-sm font-medium mb-2" htmlFor="specificDate">
-                  <Calendar className="w-4 h-4 inline-block mr-2" />
-                  Select Date
-                </label>
-                <input
-                  type="date"
-                  id="specificDate"
-                  className="w-full rounded-md border border-gray-300 p-2"
-                  value={specificDate}
-                  onChange={e => setSpecificDate(e.target.value)}
-                />
-              </motion.div>
-            )}
-
-            {/* Location Filter */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">
-                <MapPin className="w-4 h-4 inline-block mr-2" />
-                Location
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {uniqueLocations.map((location, index) => (
-                  <motion.button
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    onClick={() => toggleLocation(location)}
-                    className={`px-3 py-1 rounded-full border transition-colors ${
-                      locationFilter.includes(location)
-                        ? 'bg-primary text-white '
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
-                    }`}
-                  >
-                    {location}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Reset Filters Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-            onClick={handleResetFilters}
-          >
-            <RefreshCcw className="w-4 h-4" />
-            Reset Filters
-          </motion.button>
-        </CardContent>
-      </Card>
-
-      {/* Display Data or Loading */}
-      {loading ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="text-center py-8"
-        >
-          Loading...
-        </motion.div>
-      ) : (
+    <div className="min-h-screen bg-[#c6e8f0]">
+      <main className="container mx-auto px-6 py-8">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="space-y-6"
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-2 mb-6"
         >
-          {filteredData.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                Log your tics to receive personalized suggestions based on your tic types and patterns.
-              </CardContent>
-            </Card>
-          ) : (
-            // Render suggestions based on categories from filtered data
-            categoriesFromFilteredData.map((category, idx) => {
-              const suggestions = suggestionsMap[category] || [];
-              if (suggestions.length === 0) return null;
-
-              return (
-                <motion.div
-                  key={category}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.1 }}
-                >
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {category}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="list-disc list-inside space-y-1">
-                        {suggestions.map((suggestion, i) => (
-                          <li key={i}>{suggestion}</li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })
-          )}
+          <Brain className="w-8 h-8 text-[#256472]" />
+          <h2 className="text-3xl font-bold text-[#256472]">
+            Tic Suggestions
+          </h2>
         </motion.div>
-      )}
-    </motion.div>
+
+        {/* Filters Card */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Filters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Time Range Filter */}
+              <div>
+                <label
+                  className="block text-sm font-medium mb-2 text-[#256472]"
+                  htmlFor="timeRange"
+                >
+                  <Calendar className="w-4 h-4 inline-block mr-2" />
+                  Time Range
+                </label>
+                <select
+                  id="timeRange"
+                  className="w-full rounded-md border border-gray-300 p-2"
+                  value={timeRangeFilter}
+                  onChange={e => setTimeRangeFilter(e.target.value)}
+                >
+                  <option value="all">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="lastWeek">Last Week</option>
+                  <option value="lastMonth">Last Month</option>
+                  <option value="last3Months">Last 3 Months</option>
+                  <option value="last6Months">Last 6 Months</option>
+                  <option value="lastYear">Last Year</option>
+                  <option value="specificDate">Specific Date</option>
+                </select>
+              </div>
+
+              {/* Specific Date Filter */}
+              {timeRangeFilter === 'specificDate' && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <label
+                    className="block text-sm font-medium mb-2 text-[#256472]"
+                    htmlFor="specificDate"
+                  >
+                    <Calendar className="w-4 h-4 inline-block mr-2" />
+                    Select Date
+                  </label>
+                  <input
+                    type="date"
+                    id="specificDate"
+                    className="w-full rounded-md border border-gray-300 p-2"
+                    value={specificDate}
+                    onChange={e => setSpecificDate(e.target.value)}
+                  />
+                </motion.div>
+              )}
+
+              {/* Location Filter */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2 text-[#256472]">
+                  <MapPin className="w-4 h-4 inline-block mr-2" />
+                  Location
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {uniqueLocations.map((location, index) => (
+                    <motion.button
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      onClick={() => toggleLocation(location)}
+                      className={`px-3 py-1 rounded-full border transition-colors ${
+                        locationFilter.includes(location)
+                          ? 'bg-[#256472] text-[#C1E4EC]'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+                      }`}
+                    >
+                      {location}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Reset Filters Button */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-6 flex items-center gap-2 px-4 py-2 bg-[#256472] text-[#C1E4EC] rounded-md hover:bg-[#2F434A] transition-colors border border-[#C1E4EC]"
+              onClick={handleResetFilters}
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Reset Filters
+            </motion.button>
+          </CardContent>
+        </Card>
+
+        {/* Display Data or Loading */}
+        {loading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-center py-8 text-[#256472]"
+          >
+            Loading...
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="space-y-6"
+          >
+            {filteredData.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-8 text-[#256472]">
+                  Log your tics to receive personalized suggestions based on your tic types and patterns.
+                </CardContent>
+              </Card>
+            ) : (
+              // Render suggestions based on categories from filtered data
+              categoriesFromFilteredData.map((category, idx) => {
+                const suggestions = suggestionsMap[category] || [];
+                if (suggestions.length === 0) return null;
+
+                return (
+                  <motion.div
+                    key={category}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: idx * 0.1 }}
+                  >
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>{category}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="list-disc list-inside space-y-1 text-[#256472]">
+                          {suggestions.map((suggestion, i) => (
+                            <li key={i}>{suggestion}</li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })
+            )}
+          </motion.div>
+        )}
+      </main>
+    </div>
   );
 };
 
