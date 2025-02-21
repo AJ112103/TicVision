@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-const cors = require("cors")({ origin: (origin: any, callback: any) => (["https://www.ticvision.io/", "https://tic-vision-y6v6-git-feature-ml-recs-aj112103s-projects.vercel.app?_vercel_share=lwuu8eOoXY6w4IMHj7xtWkCQucbihahP", "http://localhost:5173"].includes(origin) || !origin ? callback(null, true) : callback(new Error("Not allowed by CORS"))) });
+const cors = require("cors")({ origin: (origin: any, callback: any) => (["https://www.ticvision.io", "https://tic-vision-y6v6-git-feature-ml-recs-aj112103s-projects.vercel.app", "http://localhost:5173"].includes(origin) || !origin ? callback(null, true) : callback(new Error("Not allowed by CORS"))) });
 
 admin.initializeApp();
 
