@@ -29,7 +29,7 @@ const TicTable: React.FC<TicTableProps> = ({ filteredData, sortDirection, toggle
     }
     try {
       const response = await fetch(
-        "https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/deleteTic",
+        "https://us-central1-ticvision.cloudfunctions.net/deleteTic",
         {
           method: "POST",
           headers: {
