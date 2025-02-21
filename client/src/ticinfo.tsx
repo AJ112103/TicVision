@@ -148,9 +148,6 @@ const TicInfo: React.FC = () => {
                 <strong>Vocal Phrase:</strong> Involuntary production of short phrases or sentences, which may feel uncontrollable and occur unexpectedly.
               </p>
               <p>
-                <strong>Vocal Breathing Sounds:</strong> Involves noises like gasping, sighing, or forceful inhaling.
-              </p>
-              <p>
                 <strong>Vocal Complex:</strong> Speech-like utterances. They often include words, phrases, or even complete sentences that may appear purposeful but are involuntary. Common types include: Echolalia, Palilalia and Coprolalia.
               </p>
               <p>
