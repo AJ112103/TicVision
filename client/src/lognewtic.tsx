@@ -68,6 +68,8 @@ const LogNewTic = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [includeLocation, setIncludeLocation] = useState(false);
   const [locationBlocked, setLocationBlocked] = useState(false);
+  // Ask for description directly in this component
+  const [description, setDescription] = useState("");
 
   const selectedTic = ticTypes.find(
     (tic) => tic.name.replace(/\s+/g, "-").toLowerCase() === ticType
@@ -120,6 +122,7 @@ const LogNewTic = () => {
     timeOfDay: string;
     location: string;
     intensity: number;
+    description?: string | null;
     latitude?: number;
     longitude?: number;
   }) => {
@@ -134,15 +137,15 @@ const LogNewTic = () => {
     try {
       setLoading(true);
   
-      const idToken = await user.getIdToken(); // Get the user's ID token
+      const idToken = await user.getIdToken();
   
       const response = await fetch(
-        "https://logtic-ejt4pl3dna-uc.a.run.app", // Custom Cloud Run URL
+        "https://logtic-ejt4pl3dna-uc.a.run.app",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`, // Include token for authentication
+            Authorization: `Bearer ${idToken}`,
           },
           body: JSON.stringify(ticData),
         }
@@ -171,12 +174,13 @@ const LogNewTic = () => {
   };
 
   const handleSubmit = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ticData: any = {
       date: selectedDate,
       timeOfDay,
-      location: ticType?.replace("-", " ") || "Unknown",
+      location: selectedTic?.name || "Unknown",
       intensity,
+      // Ensure we pass `null` if no description was entered:
+      description: description ? description : null,
     };
 
     if (includeLocation && latitude !== null && longitude !== null) {
@@ -202,126 +206,138 @@ const LogNewTic = () => {
   }, []);
 
   return (
-  <div className="flex flex-col items-center justify-center h-screen bg-[#c6e8f0]">
-    {/* Modal Container */}
-    <div className="max-w-md w-full bg-[#c6e8f0] rounded-lg p-6">
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <p className="text-lg font-semibold">Loading...</p>
-        </div>
-      ) : success ? (
-        <div className="flex justify-center items-center h-64">
-          <p className="text-lg font-semibold">Success!</p>
-        </div>
-      ) : (
-        <>
-        <h2 className="text-lg font-bold text-center mb-6">Log New Tic</h2>
-          {/* Selected Tic Display */}
-          {selectedTic && (
-            <div className="flex flex-col items-center justify-center mx-auto mb-6 p-4 bg-[#256472] text-[#C1E4EC] rounded-lg w-[150px] border border-gray-700">
-              <img
-                src={selectedTic.icon}
-                alt={selectedTic.name}
-                className="mb-3 w-20 h-auto"
+    <div className="flex flex-col items-center justify-center h-screen bg-[#c6e8f0]">
+      <div className="max-w-md w-full bg-[#c6e8f0] rounded-lg p-6">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-lg font-semibold">Loading...</p>
+          </div>
+        ) : success ? (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-lg font-semibold">Success!</p>
+          </div>
+        ) : (
+          <>
+            <h2 className="text-lg font-bold text-center mb-6">Log New Tic</h2>
+            {selectedTic && (
+              <div className="flex flex-col items-center justify-center mx-auto mb-6 p-4 bg-[#256472] text-[#C1E4EC] rounded-lg w-[150px] border border-gray-700">
+                <img
+                  src={selectedTic.icon}
+                  alt={selectedTic.name}
+                  className="mb-3 w-20 h-auto"
+                />
+                <span className="text-sm font-medium text-center">{selectedTic.name}</span>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label
+                htmlFor="intensity"
+                className="block text-sm font-medium text-gray-700 text-center mb-2"
+              >
+                Intensity
+              </label>
+              <input
+                id="intensity"
+                type="range"
+                min="1"
+                max="10"
+                value={intensity}
+                onChange={(e) => setIntensity(Number(e.target.value))}
+                className="w-full accent-[#4a90a1]"
               />
-              <span className="text-sm font-medium text-center">{selectedTic.name}</span>
+              <div className="text-center mt-2 text-gray-600">
+                Intensity: {intensity}
+              </div>
             </div>
-          )}
 
-          {/* Intensity Slider */}
-          <div className="mb-4">
-            <label
-              htmlFor="intensity"
-              className="block text-sm font-medium text-gray-700 text-center mb-2"
+            <div className="mb-4">
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium text-gray-700 text-center mb-2"
+              >
+                Date
+              </label>
+              <input
+                id="date"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="timeOfDay"
+                className="block text-sm font-medium text-gray-700 text-center mb-2"
+              >
+                Time of Day
+              </label>
+              <select
+                id="timeOfDay"
+                value={timeOfDay}
+                onChange={(e) => setTimeOfDay(e.target.value)}
+                className="w-full p-2 border rounded"
+              >
+                <option value="All Day">All Day</option>
+                <option value="Morning">Morning</option>
+                <option value="Afternoon">Afternoon</option>
+                <option value="Evening">Evening</option>
+                <option value="Night">Night</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 text-center mb-2"
+              >
+                Description (optional)
+              </label>
+              <input
+                id="description"
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="What were you doing? How did it feel?"
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="mb-6 text-center">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Include Location
+              </label>
+              <Switch
+                onChange={handleToggleChange}
+                checked={includeLocation}
+                onColor="#4a90a1"
+                offColor="#d1d5db"
+                uncheckedIcon={false}
+                checkedIcon={false}
+                height={24}
+                width={48}
+                disabled={locationBlocked}
+              />
+              <p className="mt-2 text-sm text-gray-600">
+                {includeLocation
+                  ? "Location will be included."
+                  : "Location will not be included."}
+              </p>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-[#4a90a1] hover:bg-[#3b7a87] text-white py-2 px-4 rounded"
             >
-              Intensity
-            </label>
-            <input
-              id="intensity"
-              type="range"
-              min="1"
-              max="10"
-              value={intensity}
-              onChange={(e) => setIntensity(Number(e.target.value))}
-              className="w-full accent-[#4a90a1]"
-            />
-            <div className="text-center mt-2 text-gray-600">Intensity: {intensity}</div>
-          </div>
-
-          {/* Date Picker */}
-          <div className="mb-4">
-            <label
-              htmlFor="date"
-              className="block text-sm font-medium text-gray-700 text-center mb-2"
-            >
-              Date
-            </label>
-            <input
-              id="date"
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-
-          {/* Time of Day Selector */}
-          <div className="mb-4">
-            <label
-              htmlFor="timeOfDay"
-              className="block text-sm font-medium text-gray-700 text-center mb-2"
-            >
-              Time of Day
-            </label>
-            <select
-              id="timeOfDay"
-              value={timeOfDay}
-              onChange={(e) => setTimeOfDay(e.target.value)}
-              className="w-full p-2 border rounded"
-            >
-              <option value="All Day">All Day</option>
-              <option value="Morning">Morning</option>
-              <option value="Afternoon">Afternoon</option>
-              <option value="Evening">Evening</option>
-              <option value="Night">Night</option>
-            </select>
-          </div>
-
-          {/* Include Location Switch */}
-          <div className="mb-6 text-center">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Include Location
-            </label>
-            <Switch
-              onChange={handleToggleChange}
-              checked={includeLocation}
-              onColor="#4a90a1"
-              offColor="#d1d5db"
-              uncheckedIcon={false}
-              checkedIcon={false}
-              height={24}
-              width={48}
-              disabled={locationBlocked}
-            />
-            <p className="mt-2 text-sm text-gray-600">
-              {includeLocation
-                ? "Location will be included."
-                : "Location will not be included."}
-            </p>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-[#4a90a1] hover:bg-[#3b7a87] text-white py-2 px-4 rounded"
-          >
-            Log Tic
-          </button>
-        </>
-      )}
+              Log Tic
+            </button>
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
-}
+  );
+};
 
 export default LogNewTic;

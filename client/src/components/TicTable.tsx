@@ -1,15 +1,17 @@
 // src/components/TicTable.tsx
-import React from "react";
-import { motion } from "framer-motion";
-import { ArrowUpDown, Trash } from "lucide-react";
+
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowUpDown } from "lucide-react";
 import MobileSortButton from "./MobileSortButton";
 
 export interface TicData {
-  id?: string; // Document ID for deletion
+  id?: string; // Document ID (if available)
   timeOfDay: string;
   date: string;
   intensity: number;
   location: string;
+  description: string;
 }
 
 interface TicTableProps {
@@ -18,38 +20,16 @@ interface TicTableProps {
   toggleSort: () => void;
 }
 
-const TicTable: React.FC<TicTableProps> = ({ filteredData, sortDirection, toggleSort }) => {
-  // Handler to call the Cloud Function to delete a tic.
-  const handleDelete = async (ticId?: string) => {
-    if (!ticId) return;
-    const token = localStorage.getItem("userToken");
-    if (!token) {
-      alert("User not authenticated");
-      return;
-    }
-    try {
-      const response = await fetch(
-        "https://us-central1-ticvision.cloudfunctions.net/deleteTic",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ ticId }),
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert("Error deleting tic: " + errorData.error);
-      } else {
-        // Optionally, refresh data or update UI accordingly.
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error("Error deleting tic:", error);
-      alert("Error deleting tic");
-    }
+const TicTable: React.FC<TicTableProps> = ({
+  filteredData,
+  sortDirection,
+  toggleSort,
+}) => {
+  // For mobile view, track which card is expanded to show the description.
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
+  const toggleCardExpansion = (id: string) => {
+    setExpandedCard(expandedCard === id ? null : id);
   };
 
   return (
@@ -58,16 +38,16 @@ const TicTable: React.FC<TicTableProps> = ({ filteredData, sortDirection, toggle
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <h3 className="text-xl mb-4 font-semibold">Tic Data Table</h3>
+      <h3 className="text-xl mb-4 font-semibold text-center">Tic Data Table</h3>
       <MobileSortButton onSortClick={toggleSort} sortDirection={sortDirection} />
 
       {/* Desktop Table View */}
       <div className="hidden sm:block overflow-x-auto">
-        <table className="tic-table min-w-full bg-white rounded-lg overflow-hidden border">
+        <table className="min-w-full bg-white rounded-lg overflow-hidden border">
           <thead className="bg-primary text-white">
             <tr>
-              <th className="py-3 px-6 text-left">
-                <div className="flex items-center gap-2">
+              <th className="py-3 px-6 text-center whitespace-nowrap">
+                <div className="flex items-center justify-center gap-2">
                   Date
                   <button
                     onClick={toggleSort}
@@ -80,15 +60,24 @@ const TicTable: React.FC<TicTableProps> = ({ filteredData, sortDirection, toggle
                   </button>
                 </div>
               </th>
-              <th className="py-3 px-6 text-left">Time of Day</th>
-              <th className="py-3 px-6 text-left">Tic Type</th>
-              <th className="py-3 px-6 text-left">Intensity</th>
+              <th className="py-3 px-6 text-center whitespace-nowrap">
+                Time of Day
+              </th>
+              <th className="py-3 px-6 text-center whitespace-nowrap">
+                Tic Type
+              </th>
+              <th className="py-3 px-6 text-center whitespace-nowrap">
+                Intensity
+              </th>
+              <th className="py-3 px-6 text-center whitespace-nowrap">
+                Description
+              </th>
             </tr>
           </thead>
           <tbody>
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center py-4">
+                <td colSpan={5} className="text-center py-4">
                   No data available.
                 </td>
               </tr>
@@ -96,28 +85,39 @@ const TicTable: React.FC<TicTableProps> = ({ filteredData, sortDirection, toggle
               filteredData.map((tic, index) => (
                 <tr
                   key={tic.id || index}
-                  className={`group ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+                  className={`${
+                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  }`}
                 >
-                  <td data-label="Date" className="py-3 px-6">
+                  <td
+                    data-label="Date"
+                    className="py-3 px-6 text-center whitespace-nowrap"
+                  >
                     {new Date(tic.date).toLocaleDateString()}
                   </td>
-                  <td data-label="Time of Day" className="py-3 px-6">
+                  <td
+                    data-label="Time of Day"
+                    className="py-3 px-6 text-center whitespace-nowrap"
+                  >
                     {tic.timeOfDay}
                   </td>
-                  <td data-label="Location (Tic)" className="py-3 px-6">
+                  <td
+                    data-label="Tic Type"
+                    className="py-3 px-6 text-center whitespace-nowrap"
+                  >
                     {tic.location}
                   </td>
-                  <td data-label="Intensity" className="py-3 px-6 flex items-center justify-between">
-                    <span>{tic.intensity}</span>
-                    <motion.button
-                      onClick={() => handleDelete(tic.id)}
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.2 }}
-                      className="invisible group-hover:visible"
-                      title="Delete Tic"
-                    >
-                      <Trash size={20} className="text-gray-500" />
-                    </motion.button>
+                  <td
+                    data-label="Intensity"
+                    className="py-3 px-6 text-center whitespace-nowrap"
+                  >
+                    {tic.intensity}
+                  </td>
+                  <td
+                    data-label="Description"
+                    className="py-3 px-6 text-center whitespace-nowrap"
+                  >
+                    {tic.description ? tic.description : "None"}
                   </td>
                 </tr>
               ))
@@ -131,41 +131,49 @@ const TicTable: React.FC<TicTableProps> = ({ filteredData, sortDirection, toggle
         {filteredData.length === 0 ? (
           <p className="text-center py-4">No data available.</p>
         ) : (
-          filteredData.map((tic, index) => (
-            <motion.div
-              key={tic.id || index}
-              className="bg-white rounded shadow p-4 mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-semibold">
-                  {new Date(tic.date).toLocaleDateString()}
-                </h4>
-                <motion.button
-                  onClick={() => handleDelete(tic.id)}
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-gray-500"
-                  title="Delete Tic"
-                >
-                  <Trash size={20} />
-                </motion.button>
-              </div>
-              <p className="mb-1">
-                <span className="font-semibold">Time of Day: </span>
-                {tic.timeOfDay}
-              </p>
-              <p className="mb-1">
-                <span className="font-semibold">Tic Type: </span>
-                {tic.location}
-              </p>
-              <p className="mb-1">
-                <span className="font-semibold">Intensity: </span>
-                {tic.intensity}
-              </p>
-            </motion.div>
-          ))
+          filteredData.map((tic, index) => {
+            const cardId = tic.id || index.toString();
+            return (
+              <motion.div
+                key={cardId}
+                className="bg-white rounded shadow p-4 mb-4 cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => toggleCardExpansion(cardId)}
+              >
+                <div className="text-center mb-2">
+                  <h4 className="font-semibold">
+                    {new Date(tic.date).toLocaleDateString()}
+                  </h4>
+                </div>
+                <div className="mb-1 text-center">
+                  <span className="font-semibold">Time of Day: </span>
+                  {tic.timeOfDay}
+                </div>
+                <div className="mb-1 text-center">
+                  <span className="font-semibold">Tic Type: </span>
+                  {tic.location}
+                </div>
+                <div className="mb-1 text-center">
+                  <span className="font-semibold">Intensity: </span>
+                  {tic.intensity}
+                </div>
+                <AnimatePresence>
+                  {expandedCard === cardId && (
+                    <motion.div
+                      className="mt-2 text-center p-2 bg-gray-100 rounded"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      <span className="font-semibold">Description: </span>
+                      {tic.description ? tic.description : "None"}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })
         )}
       </div>
     </motion.div>

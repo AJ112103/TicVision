@@ -1,30 +1,25 @@
+// src/TicData.tsx
 import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "./firebase"; // Adjust the path as needed
-import TicFilters, { timeRanges, TimeRangeKey } from "./components/TicFilters";
+import TicFilters, { TimeRangeKey } from "./components/TicFilters";
 import TicChart from "./components/TicChart";
 import TicTable, { TicData as TicDataType } from "./components/TicTable";
 
-interface TicData {
-  timeOfDay: string;
-  date: string;
-  intensity: number;
-  location: string;
-}
-
+// For storing user-defined tic types
 interface MyTic {
   name: string;
   count: number;
   color: string;
 }
 
-// Chart modes
+// Available chart modes
 const chartModes = ["avg", "total", "count"] as const;
-type ChartMode = "avg" | "total" | "count";
+type ChartMode = (typeof chartModes)[number];
 
 const TicData: React.FC = () => {
-  const [ticData, setTicData] = useState<TicData[]>([]);
+  const [ticData, setTicData] = useState<TicDataType[]>([]);
   const [myTics, setMyTics] = useState<MyTic[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -38,7 +33,7 @@ const TicData: React.FC = () => {
   const [chartModeIndex, setChartModeIndex] = useState<number>(0);
   const currentChartMode: ChartMode = chartModes[chartModeIndex];
 
-  // Data Fetching
+  // Fetch data on mount
   useEffect(() => {
     fetchData();
   }, []);
@@ -54,17 +49,21 @@ const TicData: React.FC = () => {
       // 1) Fetch ticHistory
       const historyCollection = collection(db, "users", user.uid, "ticHistory");
       const snapshot = await getDocs(historyCollection);
-      const rawData: TicData[] = snapshot.docs.map((doc) => {
+
+      const rawData: TicDataType[] = snapshot.docs.map((doc) => {
         const docData = doc.data();
         return {
+          id: doc.id,
           timeOfDay: docData.timeOfDay,
           date: docData.date,
           intensity: docData.intensity,
           location: docData.location,
+          // Include description if available, fallback to empty string
+          description: docData.description ?? "",
         };
       });
 
-      // 2) Fetch myTics (for colors, etc.)
+      // 2) Fetch myTics (used for assigning colors, etc.)
       const myTicsCollection = collection(db, "users", user.uid, "mytics");
       const myTicsSnap = await getDocs(myTicsCollection);
       const tics: MyTic[] = myTicsSnap.docs.map((doc) => {
@@ -72,6 +71,7 @@ const TicData: React.FC = () => {
         return {
           name: data.name,
           count: data.count,
+          // Generate a random color for each tic type (or fetch from doc)
           color: `#${Math.floor(Math.random() * 16777215)
             .toString(16)
             .padStart(6, "0")}`,
@@ -87,7 +87,7 @@ const TicData: React.FC = () => {
     }
   };
 
-  // ---- FILTERING ----
+  // ----------------- FILTERING & SORTING -----------------
   const filteredData = useMemo(() => {
     const now = new Date();
     let data = [...ticData];
@@ -109,7 +109,9 @@ const TicData: React.FC = () => {
           case "last3Months":
             return now.getTime() - ticDate.getTime() <= 90 * 24 * 60 * 60 * 1000;
           case "last6Months":
-            return now.getTime() - ticDate.getTime() <= 180 * 24 * 60 * 60 * 1000;
+            return (
+              now.getTime() - ticDate.getTime() <= 180 * 24 * 60 * 60 * 1000
+            );
           case "lastYear":
             return ticDate.getFullYear() === now.getFullYear();
           case "all":
@@ -139,17 +141,15 @@ const TicData: React.FC = () => {
     return data;
   }, [ticData, timeRangeFilter, specificDate, locationFilter, sortDirection]);
 
-  // Distinct locations for filters
+  // Collect unique locations for the filter checkboxes
   const uniqueLocations = useMemo(() => {
     return Array.from(new Set(ticData.map((t) => t.location)));
   }, [ticData]);
 
-  // Table sort toggle
   const toggleSort = () => {
     setSortDirection(sortDirection === "desc" ? "asc" : "desc");
   };
 
-  // Reset filters
   const handleResetFilters = () => {
     setTimeRangeFilter("all");
     setSpecificDate("");
@@ -157,15 +157,15 @@ const TicData: React.FC = () => {
     setSortDirection("desc");
   };
 
-  // Toggle location filter
   const toggleLocation = (loc: string) => {
     setLocationFilter((prev) =>
       prev.includes(loc) ? prev.filter((x) => x !== loc) : [...prev, loc]
     );
   };
 
-  // ---- CHART DATA PROCESSING ----
-  const processChartData = (data: TicData[]) => {
+  // ----------------- CHART DATA PROCESSING -----------------
+  const processChartData = (data: TicDataType[]) => {
+    // If "today" is chosen, group by timeOfDay; otherwise group by date
     const groupingByTimeOfDay = timeRangeFilter === "today";
     const grouped: Record<
       string,
@@ -182,6 +182,7 @@ const TicData: React.FC = () => {
       grouped[key][tic.location].count += 1;
     });
 
+    // Convert the grouped object into an array for charting
     const result = Object.entries(grouped).map(([timeKey, locationMap]) => {
       const row: Record<string, number | string> = { timeKey };
       Object.entries(locationMap).forEach(([loc, { sum, count }]) => {
@@ -200,13 +201,15 @@ const TicData: React.FC = () => {
       return row;
     });
 
-    // Sort by time (for "today" use time of day; otherwise by date)
+    // Sort by timeKey
     result.sort((a, b) => {
       if (timeRangeFilter === "today") {
+        // Sort by timeOfDay as time
         const timeA = new Date(`2000-01-01 ${a.timeKey}`).getTime();
         const timeB = new Date(`2000-01-01 ${b.timeKey}`).getTime();
         return timeA - timeB;
       } else {
+        // Sort by date
         const dateA = new Date(a.timeKey as string).getTime();
         const dateB = new Date(b.timeKey as string).getTime();
         return dateA - dateB;
@@ -216,13 +219,12 @@ const TicData: React.FC = () => {
     return result;
   };
 
-  const chartRawData = useMemo(() => processChartData(filteredData), [
-    filteredData,
-    currentChartMode,
-    timeRangeFilter,
-  ]);
+  const chartRawData = useMemo(
+    () => processChartData(filteredData),
+    [filteredData, currentChartMode, timeRangeFilter]
+  );
 
-  // Build header for chart (e.g. ["Time", "Location1", "Location2", ...])
+  // Collect all locations found in the chart data
   const allLocationsInChart = useMemo(() => {
     const setLoc = new Set<string>();
     chartRawData.forEach((row) => {
@@ -233,13 +235,11 @@ const TicData: React.FC = () => {
     return Array.from(setLoc);
   }, [chartRawData]);
 
-  // Assign colors to each location
+  // Assign a color for each location
   const colorMap = useMemo(() => {
     const map: Record<string, string> = {};
     const randomColor = () =>
-      `#${Math.floor(Math.random() * 16777215)
-        .toString(16)
-        .padStart(6, "0")}`;
+      `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
     allLocationsInChart.forEach((loc) => {
       const matchedTic = myTics.find((t) => t.name === loc);
       if (matchedTic) {
@@ -253,7 +253,7 @@ const TicData: React.FC = () => {
     return map;
   }, [allLocationsInChart, myTics]);
 
-  // Final 2D array for Google Chart
+  // Convert the raw chart data into the 2D array format for Google Charts
   const chartDataForGoogle = useMemo(() => {
     if (!chartRawData.length) return [["Time"]];
     const header = ["Time", ...allLocationsInChart];
@@ -267,7 +267,7 @@ const TicData: React.FC = () => {
     return [header, ...rows];
   }, [chartRawData, allLocationsInChart]);
 
-  // Find max data value (for setting Y-axis limit)
+  // Find the max data value for adjusting chart Y-axis
   const findMaxValue = (data: any[][]) => {
     let maxVal = 0;
     for (let i = 1; i < data.length; i++) {
@@ -282,8 +282,10 @@ const TicData: React.FC = () => {
   };
 
   const maxDataValue = findMaxValue(chartDataForGoogle);
-  const chartMax = currentChartMode === "avg" ? 10 : Math.max(maxDataValue + 5, 5);
+  const chartMax =
+    currentChartMode === "avg" ? 10 : Math.max(maxDataValue + 5, 5);
 
+  // Options for Google Chart
   const chartOptions = {
     curveType: "function",
     legend: { position: "bottom" },
@@ -303,6 +305,7 @@ const TicData: React.FC = () => {
     }
   };
 
+  // Handlers for switching chart modes
   const prevMode = () => {
     setChartModeIndex((prev) => (prev + chartModes.length - 1) % chartModes.length);
   };
