@@ -80,7 +80,7 @@ const Dashboard = () => {
         {/* Today's Overview Section */}
         <div className="bg-[#4a90a1] text-white rounded-lg shadow-lg p-6 space-y-6 border border-black">
           <h2 className="text-lg font-bold text-center bg-[#e3f2fd] text-[#256472] py-2 rounded-lg shadow-md border border-gray-700">
-            Today's Overview
+            Overview
           </h2>
 
           {/* Tics Logged Section */}
@@ -98,7 +98,7 @@ const Dashboard = () => {
           {/* AI Advice Section */}
           <div className="flex flex-col items-center">
             <h2 className="text-lg font-bold text-center bg-[#C1E4EC] text-[#2F434A] py-2 px-2 rounded-lg shadow-md border border-gray-700">
-              {advice}
+              When you sense your neck tic coming on, try a competing response: gently tense your neck muscles for 10 seconds and then slowly release, to disrupt the tic cycle.
             </h2>
             <h3 className="text-lg font-bold text-center bg-[#256472] text-[#C1E4EC] py-1 px-2 rounded-lg shadow-md mt-3 border border-[#C1E4EC]">
               AI Suggestion
