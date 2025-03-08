@@ -98,7 +98,7 @@ const Dashboard = () => {
         {/* Today's Overview Section */}
         <div className="bg-[#4a90a1] text-white rounded-lg shadow-lg p-6 space-y-6 border border-black">
           <h2 className="text-lg font-bold text-center bg-[#e3f2fd] text-[#256472] py-2 rounded-lg shadow-md border border-gray-700">
-            Today's Overview
+            Overview
           </h2>
 
           {/* Tics Logged Section */}
