@@ -98,7 +98,7 @@ const Dashboard = () => {
           {/* AI Advice Section */}
           <div className="flex flex-col items-center">
             <h2 className="max-w-md p-2 rounded-lg shadow-md border border-gray-700 bg-[#C1E4EC] text-[#2F434A] text-lg font-bold text-center whitespace-normal">
-              When you sense your neck tic coming on, try a competing response: gently tense your neck muscles for 10 seconds and then slowly release, to disrupt the tic cycle.
+              Have a Good Day 😊!
             </h2>
             <h3 className="text-lg font-bold text-center bg-[#256472] text-[#C1E4EC] py-1 px-2 rounded-lg shadow-md mt-3 border border-[#C1E4EC]">
               AI Suggestion
