@@ -98,7 +98,7 @@ const Dashboard = () => {
           {/* AI Advice Section */}
           <div className="flex flex-col items-center">
             <h2 className="max-w-md p-2 rounded-lg shadow-md border border-gray-700 bg-[#C1E4EC] text-[#2F434A] text-lg font-bold text-center whitespace-normal">
-              Have a Good Day 😊!
+              When you sense the urge to tic, pause, breathe slowly, and engage a competing response (like gently tensing an alternative muscle) to help reduce its intensity.
             </h2>
             <h3 className="text-lg font-bold text-center bg-[#256472] text-[#C1E4EC] py-1 px-2 rounded-lg shadow-md mt-3 border border-[#C1E4EC]">
               AI Suggestion
