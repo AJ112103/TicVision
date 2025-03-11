@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.login-wrapper {
+  @apply min-h-screen w-full;
+}
+
+.login-container {
+  @apply min-h-screen flex flex-col md:flex-row;
+}
+
+.login-info {
+  @apply flex-1 flex flex-col justify-center items-center text-center p-8 bg-[#E6F3FF];
+  animation: fadeInUp 1s ease-in-out;
+}
+
+.login-info-title {
+  @apply text-3xl md:text-4xl font-bold mb-4 font-display text-primary;
+  animation: fadeInUp 1s ease-in-out;
+}
+
+.login-info-description {
+  @apply text-base md:text-lg max-w-lg leading-relaxed text-text-primary/90 px-4;
+  animation: fadeInUp 1.2s ease-in-out;
+}
+
+.login-auth {
+  @apply flex-1 flex flex-col items-center justify-center p-8 bg-[#F8FAFC];
+  animation: fadeInUp 1s ease-in-out;
+}
+
+.login-title {
+  @apply text-2xl md:text-3xl font-bold mb-8 font-display text-text-primary text-center;
+}
+
+.login-button {
+  @apply flex items-center justify-center bg-primary text-white px-6 py-3 rounded-lg font-medium shadow-lg transition-all w-full max-w-sm;
+}
+
+.login-button:hover {
+  @apply bg-primary-dark shadow-xl;
+}
+
+.google-logo {
+  @apply w-6 h-6 mr-3;
+}
+
+@media (max-width: 767px) {
+  .login-container {
+    @apply grid grid-rows-2;
+  }
+  
+  .login-info {
+    @apply row-start-1;
+  }
+  
+  .login-auth {
+    @apply row-start-2;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,67 @@
+/* Table Heading Styling */
+.tic-table th {
+  @apply text-sm font-medium text-left;
+}
+
+/* Table Body Cell Styling */
+.tic-table td {
+  @apply text-sm text-text-primary; /* Adjust this to your preferred color utility (e.g., text-gray-700) */
+}
+
+/* 
+  Enable horizontal scrolling on smaller devices
+  and keep the table width full.
+*/
+.tic-table {
+  @apply w-full overflow-x-auto;
+}
+
+/* 
+  --------
+  Mobile (<= 768px) Responsive Table
+  Hide thead and display each row as a "card" with labeled data in td::before 
+  --------
+*/
+@media (max-width: 768px) {
+  .tic-table thead {
+    @apply hidden; 
+  }
+
+  .tic-table tbody,
+  .tic-table tr,
+  .tic-table td {
+    @apply block w-full;
+  }
+
+  .tic-table tr {
+    @apply mb-4 border-b-2 border-gray-200;
+  }
+
+  .tic-table td {
+    @apply relative text-right p-3; 
+  }
+
+  .tic-table td::before {
+    content: attr(data-label);
+    @apply absolute left-3 font-bold text-left; 
+  }
+}
+
+/* Custom styles for toggle buttons */
+button {
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none;
+}
+
+button {
+  white-space: nowrap;
+}
+
+/* Example override for .bg-primary (if using Tailwind or a custom config)
+.bg-primary {
+  background-color: #1DA1F2; 
+}
+*/

@@ -1,0 +1,22 @@
+@layer components {
+    .testimonial-card {
+      @apply p-6 bg-white rounded-xl shadow-md;
+    }
+  
+    .testimonial-text {
+      @apply text-sm sm:text-base text-text-secondary mb-4;
+    }
+  
+    .testimonial-author {
+      @apply flex items-center justify-center;
+    }
+  
+    .author-avatar {
+      @apply h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center;
+    }
+  
+    .author-name {
+      @apply ml-3 text-sm sm:text-base font-semibold;
+    }
+  }
+  
